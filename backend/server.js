@@ -4,6 +4,7 @@ import connectDb from './db/connectDb.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import userRoutes from './routes/userRoutes.js';
+import documentRoutes from './routes/documentRoutes.js';
 
 dotenv.config();
 
@@ -27,13 +28,13 @@ const allowedOrigins = [
 const corsOptions = isDev
   ? {
       origin: true, // reflect request origin
-      methods: [" GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      methods: [" GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
       credentials: true,
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     }
   : {
       origin: allowedOrigins,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
       credentials: true,
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     };
@@ -45,7 +46,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/users', userRoutes); 
+app.use('/api/users', userRoutes);
+app.use('/api/documents', documentRoutes); 
 
 // Connect to MongoDB
 connectDb();

@@ -7,11 +7,22 @@ import {
   getUser,
   updateUserResults,
   fetchResults,
+  authenticateAdmin,
+  getPendingUsers,
+  approveUser,
+  rejectUser,
 } from "../controllers/userController.js";
 import { userAuth } from "../middlewares/Auth.js";
+import { adminAuth } from "../middlewares/AdminAuth.js";
 import express from "express";
 
 const router = express.Router();
+
+// Admin authentication
+router.post("/admin/authenticate", authenticateAdmin);
+router.get("/admin/pending-users", adminAuth, getPendingUsers);
+router.post("/admin/approve-user", adminAuth, approveUser);
+router.post("/admin/reject-user", adminAuth, rejectUser);
 
 router.post("/register", registerUser);
 router.post("/send-otp", sendLoginOTP);

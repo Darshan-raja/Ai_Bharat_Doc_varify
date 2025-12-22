@@ -22,6 +22,23 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    workingDomain: {
+        type: String,
+        trim: true
+    },
+    organization: {
+        type: String,
+        trim: true
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    rejectionReason: {
+        type: String,
+        default: null
+    },
     lastResults: [
         {
             name: { type: String, required: true },
