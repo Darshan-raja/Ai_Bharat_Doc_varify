@@ -131,13 +131,13 @@ export default function Help() {
 
           {/* FAQ Section */}
           <Card className="border-primary/20">
-            
+            <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <HelpCircle className="h-5 w-5" />
                 <span>Frequently Asked Questions</span>
               </CardTitle>
             </CardHeader>
-            
+            <CardContent>
               <Accordion type="single" collapsible className="space-y-2">
                 {faqs.map((faq, index) => (
                   <AccordionItem
@@ -211,8 +211,8 @@ export default function Help() {
               <CardHeader>
                 <CardTitle>Get in Touch</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">{
-                <div className="space-y-4">
+              <CardContent className="space-y-6">
+                <div className="space-y-4">{
                   <div className="flex items-start space-x-4">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Mail className="h-5 w-5 text-primary" />

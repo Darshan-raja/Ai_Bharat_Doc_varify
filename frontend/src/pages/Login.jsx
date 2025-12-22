@@ -267,7 +267,7 @@ export default function Login() {
               </p>
             </CardHeader>
 
-            
+            <CardContent>
               {!otpSent ? (
                 <Tabs
                   value={activeTab}

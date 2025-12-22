@@ -37,10 +37,6 @@ const mockUser = {
   role: "verifier",
 };
 
-;
-  visualizationUrl?: string;
-}
-
 const PredictBBoxWidget = () => {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
@@ -260,7 +256,7 @@ export default function Verify() {
       const trueDetections = detections.filter((d) => d.class_name === "true");
 
       // Determine status - if any fake detections found, mark as invalid/review
-      let status: "valid" | "review" | "invalid";
+      let status;
       if (fakeDetections.length > 0) {
         // Check if any high confidence fake detections
         const highConfidenceFakes = fakeDetections.filter(
@@ -435,7 +431,7 @@ export default function Verify() {
         const blob = await response.blob();
         const reader = new FileReader();
         imageBase64 = await new Promise((resolve) => {
-          reader.onload = () => resolve(reader.result as string);
+          reader.onload = () => resolve(reader.result);
           reader.readAsDataURL(blob);
         });
       } catch (error) {
