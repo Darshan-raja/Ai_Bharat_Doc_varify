@@ -212,14 +212,14 @@ export default function Help() {
                 <CardTitle>Get in Touch</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-4">{
+                <div className="space-y-4">
                   <div className="flex items-start space-x-4">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Mail className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <p className="font-medium">Email Support</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">{
                         support@authentech.com
                       </p>
                       <Badge variant="outline" className="mt-1 text-xs">

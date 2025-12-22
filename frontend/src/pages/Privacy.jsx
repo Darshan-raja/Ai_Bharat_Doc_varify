@@ -27,11 +27,11 @@ export default function Privacy() {
           {/* Content */}
           <div className="space-y-6">
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Lock className="h-5 w-5" />
                   <span>Data Collection</span>
-                </CardTitle>
+               <CardTitle> </CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
                 <p>
@@ -53,11 +53,11 @@ export default function Privacy() {
             </Card>
 
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Eye className="h-5 w-5" />
                   <span>How We Use Your Data</span>
-                </CardTitle>
+               <CardTitle> </CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
                 <h4>Primary Uses:</h4>
@@ -81,11 +81,11 @@ export default function Privacy() {
             </Card>
 
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Shield className="h-5 w-5" />
                   <span>Data Security</span>
-                </CardTitle>
+               <CardTitle> </CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
                 <h4>Security Measures:</h4>
@@ -115,11 +115,11 @@ export default function Privacy() {
             </Card>
 
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <UserCheck className="h-5 w-5" />
                   <span>Your Rights</span>
-                </CardTitle>
+               <CardTitle> </CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
                 <p>

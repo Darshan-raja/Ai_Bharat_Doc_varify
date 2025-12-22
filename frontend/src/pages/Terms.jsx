@@ -29,11 +29,11 @@ export default function Terms() {
           {/* Content */}
           <div className="space-y-6">
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Shield className="h-5 w-5" />
                   <span>Acceptance of Terms</span>
-                </CardTitle>
+               <CardTitle> </CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
                 <p>
@@ -50,11 +50,11 @@ export default function Terms() {
             </Card>
 
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <FileText className="h-5 w-5" />
                   <span>Permitted Use</span>
-                </CardTitle>
+               <CardTitle> </CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
                 <h4>You May:</h4>
@@ -95,11 +95,11 @@ export default function Terms() {
             </Card>
 
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Scale className="h-5 w-5" />
                   <span>User Responsibilities</span>
-                </CardTitle>
+               <CardTitle> </CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
                 <h4>Account Security:</h4>
@@ -127,11 +127,11 @@ export default function Terms() {
             </Card>
 
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <AlertTriangle className="h-5 w-5" />
                   <span>Limitations and Disclaimers</span>
-                </CardTitle>
+               <CardTitle> </CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
                 <h4>Service Availability:</h4>
@@ -157,7 +157,7 @@ export default function Terms() {
               </CardContent>
             </Card>
 
-            <Card className="border-primary/20">
+            <Card <CardTitle>className="border-primary/20">
               Institutional Users</CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
@@ -174,7 +174,7 @@ export default function Terms() {
               </CardContent>
             </Card>
 
-            <Card className="border-primary/20">
+            <Card <CardTitle>className="border-primary/20">
               Termination</CardTitle>
               </CardHeader>
               <CardContent className="prose prose-slate max-w-none">
@@ -191,7 +191,7 @@ export default function Terms() {
               </CardContent>
             </Card>
 
-            <Card className="border-primary/20">
+            <Card <CardTitle>className="border-primary/20">
               Contact Information</CardTitle>
               </CardHeader>
               

@@ -783,8 +783,8 @@ export default function Verify() {
 
     toast({
       title: "Report Ready for Download",
-      description: "Print dialog opened - save});
-  };
+      description: "Print dialog opened - save as PDF to download",
+    });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-card-glass to-accent/5">
