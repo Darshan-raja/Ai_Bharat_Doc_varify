@@ -34,7 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 // Mock user - in real app this would come from auth context
 const mockUser = {
   name: "Dr. Sarah Johnson",
-  role: "verifier" as const,
+  role: "verifier",
 };
 
 ;
@@ -43,9 +43,9 @@ const mockUser = {
 
 const PredictBBoxWidget = () => {
   const [image, setImage] = useState(null);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   const handleUpload = async () => {
     if (!image) return;
@@ -87,7 +87,7 @@ const PredictBBoxWidget = () => {
           setResult(URL.createObjectURL(blob));
         }
       });
-    } catch (e: any) {
+    } catch (e) {
       setError(e.message ?? "Detection failed");
     } finally {
       setLoading(false);
@@ -136,7 +136,7 @@ const PredictBBoxWidget = () => {
 export default function Verify() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [verificationStep, setVerificationStep] = useState(0);
-  const [ocrData, setOcrData] = useState<any>(null);
+  const [ocrData, setOcrData] = useState(null);
   const [verificationResult, setVerificationResult] =
     useState(null);
   const [isProcessingOCR, setIsProcessingOCR] = useState(false);

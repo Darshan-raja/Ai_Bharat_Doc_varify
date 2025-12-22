@@ -160,7 +160,7 @@ export default function Help() {
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Contact Form */}
             <Card className="border-primary/20">
-              
+              <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <MessageCircle className="h-5 w-5" />
                   <span>Contact Support</span>
@@ -208,9 +208,10 @@ export default function Help() {
 
             {/* Contact Information */}
             <Card className="border-primary/20">
-              Get in Touch</CardTitle>
+              <CardHeader>
+                <CardTitle>Get in Touch</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6">{
                 <div className="space-y-4">
                   <div className="flex items-start space-x-4">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">

@@ -43,7 +43,7 @@ export default function Login() {
 
   const API_BASE_URL = "http://localhost:5000";
 
-  const calculatePasswordStrength = (pass: string) => {
+  const calculatePasswordStrength = (pass) => {
     let strength = 0;
     if (pass.length >= 8) strength += 25;
     if (/[A-Z]/.test(pass)) strength += 25;
@@ -52,7 +52,7 @@ export default function Login() {
     return strength;
   };
 
-  const handlePasswordChange = (value: string) => {
+  const handlePasswordChange = (value) => {
     setPassword(value);
     setPasswordStrength(calculatePasswordStrength(value));
   };
@@ -81,7 +81,7 @@ export default function Login() {
       } else {
         throw new Error(data.message || "Failed to send OTP");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -128,7 +128,7 @@ export default function Login() {
       } else {
         throw new Error(data.message || "Invalid OTP");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -170,7 +170,7 @@ export default function Login() {
       } else {
         throw new Error(data.message || "Registration failed");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Registration Failed",

@@ -13,7 +13,7 @@ const actionTypes = {
   UPDATE_TOAST: "UPDATE_TOAST",
   DISMISS_TOAST: "DISMISS_TOAST",
   REMOVE_TOAST: "REMOVE_TOAST",
-} as const
+}
 
 let count = 0
 
@@ -44,7 +44,7 @@ type Action =
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-const addToRemoveQueue = (toastId: string) => {
+const addToRemoveQueue = (toastId) => {
   if (toastTimeouts.has(toastId)) {
     return
   }

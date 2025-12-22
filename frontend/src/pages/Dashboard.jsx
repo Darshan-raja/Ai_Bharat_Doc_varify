@@ -40,15 +40,13 @@ const getUserFromStorage = () => {
 };
 
 export default function Dashboard() {
-  const [user, setUser] = useState<{ name: string; role: string } | null>(
+  const [user, setUser] = useState(
     getUserFromStorage()
   );
   const [uploadedDoc, setUploadedDoc] = useState(null);
-  const [extractedData, setExtractedData] = useState<any>(null);
-  const [verificationResult, setVerificationResult] = useState<any>(null);
-  const [recentVerifications, setRecentVerifications] = useState<
-    VerificationData[]
-  >([]);
+  const [extractedData, setExtractedData] = useState(null);
+  const [verificationResult, setVerificationResult] = useState(null);
+  const [recentVerifications, setRecentVerifications] = useState([]);
   const [isLoadingVerifications, setIsLoadingVerifications] = useState(false);
   const [showAllHistoryModal, setShowAllHistoryModal] = useState(false);
 
@@ -115,7 +113,7 @@ export default function Dashboard() {
   };
 
   // Helper function to format date
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor(
@@ -231,7 +229,7 @@ export default function Dashboard() {
   // Mock user data for display while real user data loads
   const mockUser = {
     name: user?.name || "Loading...",
-    role: "verifier" as const,
+    role: "verifier",
   };
 
   return (

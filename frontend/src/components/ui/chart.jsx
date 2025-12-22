@@ -1,7 +1,7 @@
 import **{ cn } from "@/lib/utils"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = { light: "", dark: ".dark" } as const
+const THEMES = { light: "", dark: ".dark" }
 
  theme?: never }
     | { color?: never; theme, string> }
