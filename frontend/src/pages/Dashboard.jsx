@@ -46,9 +46,7 @@ export default function Dashboard() {
   const [uploadedDoc, setUploadedDoc] = useState(null);
   const [extractedData, setExtractedData] = useState(null);
   const [verificationResult, setVerificationResult] = useState(null);
-  const [recentVerifications, setRecentVerifications] = useState<
-    VerificationData[]
-  >([]);
+  const [recentVerifications, setRecentVerifications] = useState([]);
   const [isLoadingVerifications, setIsLoadingVerifications] = useState(false);
   const [showAllHistoryModal, setShowAllHistoryModal] = useState(false);
 

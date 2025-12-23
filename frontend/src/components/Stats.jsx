@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 
-function Counter({ end, suffix = "", prefix = "", duration = 2000 }: CounterProps) {
+function Counter({ end, suffix = "", prefix = "", duration = 2000 }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {

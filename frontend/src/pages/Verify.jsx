@@ -250,7 +250,7 @@ export default function Verify() {
 
       if (!response.ok) throw new Error("Verification API error");
 
-      const apiResult: VerificationApiResponse = await response.json();
+      const apiResult = await response.json();
       console.log("Verification API result:", apiResult);
 
       // Process the API result
@@ -259,7 +259,7 @@ export default function Verify() {
       const trueDetections = detections.filter((d) => d.class_name === "true");
 
       // Determine status - if any fake detections found, mark as invalid/review
-      let status: "valid" | "review" | "invalid";
+      let status;
       if (fakeDetections.length > 0) {
         // Check if any high confidence fake detections
         const highConfidenceFakes = fakeDetections.filter(
@@ -273,7 +273,7 @@ export default function Verify() {
       // Create visualization with bounding boxes
       const visualizationUrl = await createVisualization(file, detections);
 
-      const result: VerificationResult = {
+      const result = {
         status,
         detections,
         summary: {
@@ -304,8 +304,7 @@ export default function Verify() {
   };
 
   // Create visualization with bounding boxes overlaid on original image
-  const createVisualization = async (
-    file: File,
+  const createVisualization = async (file,
     detections
   ) => {
     return new Promise((resolve) => {
@@ -435,7 +434,7 @@ export default function Verify() {
         const blob = await response.blob();
         const reader = new FileReader();
         imageBase64 = await new Promise((resolve) => {
-          reader.onload = () => resolve(reader.result as string);
+          reader.onload = () => resolve(reader.result);
           reader.readAsDataURL(blob);
         });
       } catch (error) {
