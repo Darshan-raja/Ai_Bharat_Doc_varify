@@ -169,8 +169,8 @@ export default function Privacy() {
                     <strong>Phone:</strong> +91-651-XXX-XXXX
                   </p>
                   <p>
-                    <strong>Address:</strong> Team Firewall Breakers,
-                    Bhubaneswar
+                    <strong>Address:</strong> Team AURORA,
+                    
                   </p>
                 </div>
               </CardContent>

@@ -38,7 +38,7 @@ export default function Terms() {
               <CardContent className="prose prose-slate max-w-none">
                 <p>
                   By accessing and using the AuthenTech document verification
-                  platform operated by Team Firewall Breakers, you agree to be
+                  platform operated by Team Aurose, you agree to be
                   bound by these Terms of Service and all applicable laws and
                   regulations.
                 </p>
@@ -150,7 +150,7 @@ export default function Terms() {
 
                 <h4>Liability Limitation:</h4>
                 <p>
-                  Team Firewall Breakers shall not be liable for any indirect,
+                  Team AURORA shall not be liable for any indirect,
                   incidental, special, consequential, or punitive damages
                   resulting from your use of this platform.
                 </p>
@@ -209,7 +209,7 @@ export default function Terms() {
                     <strong>Phone:</strong> +91-651-XXX-XXXX
                   </p>
                   <p>
-                    <strong>Address:</strong> Team Firewall Breakers
+                    <strong>Address:</strong> Team AURORA
                     <br />
                     Technology Innovation Center
                     <br />

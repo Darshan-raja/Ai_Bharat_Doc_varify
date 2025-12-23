@@ -9,7 +9,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import verificationUI from "@/assets/verification-ui.jpg";
-import securityFeatures from "@/assets/security-features.jpg";
+import securityFeatures from "@/assets/security-features.png";
 
 const integrations = [
   { name: "REST API", desc: "Complete programmatic access" },

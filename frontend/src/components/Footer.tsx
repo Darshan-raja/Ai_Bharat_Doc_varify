@@ -103,14 +103,14 @@ export function Footer() {
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-white/60" />
                 <span className="text-sm text-white/80">
-                  Team Firewall Breakers
+                  Team
                   <br />
-                  Kolkata, West-Bengal
+                  Aurous
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-white/60" />
-                <span className="text-sm text-white/80">+91 8335867482</span>
+                <span className="text-sm text-white/80">+91 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-white/60" />
@@ -151,7 +151,7 @@ export function Footer() {
         <div className="border-t border-white/20 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-white/60">
-              © 2025 team Firewall_Breakers. All rights reserved.
+              © 2025 team AURORA. All rights reserved.
             </div>
             <div className="flex flex-wrap gap-6">
               {legal.map((link) => (
