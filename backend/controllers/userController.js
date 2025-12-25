@@ -150,13 +150,18 @@ export const sendLoginOTP = async (req, res) => {
         });
       }
 
-      // Update user with OTP details
-      user.otp = {
-        code: otpCode,
-        expiresAt,
-        sentTo: transporter ? ['email'] : []
-      };
-      await user.save();
+      // Update user with OTP details using findByIdAndUpdate to avoid full document validation
+      await User.findByIdAndUpdate(
+        user._id,
+        {
+          otp: {
+            code: otpCode,
+            expiresAt,
+            sentTo: transporter ? ['email'] : []
+          }
+        },
+        { runValidators: false } // Skip validation for backward compatibility with existing users
+      );
 
       const responsePayload = {
         success: true,
@@ -231,9 +236,12 @@ export const verifyLoginOTP = async (req, res) => {
       });
     }
 
-    // Clear the OTP after successful verification
-    user.otp = undefined;
-    await user.save();
+    // Clear the OTP after successful verification using findByIdAndUpdate to avoid full document validation
+    await User.findByIdAndUpdate(
+      user._id,
+      { $unset: { otp: "" } },
+      { runValidators: false } // Skip validation for backward compatibility with existing users
+    );
 
     // Generate JWT token
     if (!JWT_SECRET) {
@@ -510,6 +518,28 @@ export const rejectUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in rejectUser:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getUserStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const acceptedUsers = await User.countDocuments({ status: 'approved' });
+    const rejectedUsers = await User.countDocuments({ status: 'rejected' });
+    const pendingUsers = await User.countDocuments({ status: 'pending' });
+
+    res.json({
+      success: true,
+      data: {
+        total: totalUsers,
+        accepted: acceptedUsers,
+        rejected: rejectedUsers,
+        pending: pendingUsers
+      }
+    });
+  } catch (error) {
+    console.error("Error in getUserStats:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

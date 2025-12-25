@@ -29,6 +29,7 @@ import {
   AlertCircle,
   Loader2,
   ArrowLeft,
+  Users,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,6 +37,13 @@ import { useToast } from "@/hooks/use-toast";
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userStats, setUserStats] = useState({
+    accepted: 0,
+    rejected: 0,
+    pending: 0,
+    total: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -57,6 +65,7 @@ export default function AdminDashboard() {
 
     checkAdminAuth();
     fetchPendingUsers();
+    fetchUserStats();
   }, []);
 
   const fetchPendingUsers = async () => {
@@ -93,6 +102,40 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchUserStats = async () => {
+    try {
+      setStatsLoading(true);
+      const adminToken = localStorage.getItem("adminToken");
+
+      const response = await fetch(`${API_BASE_URL}/api/users/admin/user-stats`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUserStats(data.data);
+      } else if (response.status === 401) {
+        localStorage.removeItem("adminToken");
+        navigate("/admin");
+      } else {
+        throw new Error(data.message || "Failed to fetch user statistics");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to load user statistics",
+      });
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   const handleApproveUser = async () => {
     if (!selectedUser) return;
 
@@ -120,6 +163,7 @@ export default function AdminDashboard() {
         setShowApproveDialog(false);
         setSelectedUser(null);
         fetchPendingUsers();
+        fetchUserStats();
       } else {
         throw new Error(data.message || "Failed to approve user");
       }
@@ -172,6 +216,7 @@ export default function AdminDashboard() {
         setRejectionReason("");
         setSelectedUser(null);
         fetchPendingUsers();
+        fetchUserStats();
       } else {
         throw new Error(data.message || "Failed to reject user");
       }
@@ -239,6 +284,85 @@ export default function AdminDashboard() {
           <p className="text-muted-foreground mt-2">
             Review and manage pending user registrations
           </p>
+        </div>
+
+        {/* User Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {statsLoading ? (
+                <div className="flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="text-2xl font-bold">{userStats.total}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                All registered users
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Accepted Users</CardTitle>
+              <CheckCircle className="h-4 w-4 text-success" />
+            </CardHeader>
+            <CardContent>
+              {statsLoading ? (
+                <div className="flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="text-2xl font-bold text-success">{userStats.accepted}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Approved and active
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Rejected Users</CardTitle>
+              <XCircle className="h-4 w-4 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              {statsLoading ? (
+                <div className="flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="text-2xl font-bold text-destructive">{userStats.rejected}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Rejected registrations
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Users</CardTitle>
+              <AlertCircle className="h-4 w-4 text-warning" />
+            </CardHeader>
+            <CardContent>
+              {statsLoading ? (
+                <div className="flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="text-2xl font-bold text-warning">{userStats.pending}</div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Awaiting review
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         <Card>

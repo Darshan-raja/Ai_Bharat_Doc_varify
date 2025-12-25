@@ -20,8 +20,9 @@ const userSchema = new mongoose.Schema({
     },
     phoneNumber: {
         type: String,
-        required: true,
+        required: false,
         unique: true,
+        sparse: true, // Allows multiple null/undefined values while maintaining uniqueness for non-null values
         trim: true
     },
     workingDomain: {
