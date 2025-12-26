@@ -15,27 +15,23 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Shield,
-  Eye,
-  EyeOff,
   CheckCircle,
   AlertCircle,
   ArrowLeft,
   Mail,
-  Lock,
+  Phone,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import graduationImage from "@/assets/graduation-digital.jpg";
 
 export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [workingDomain, setWorkingDomain] = useState("");
   const [organization, setOrganization] = useState("");
-  const [passwordStrength, setPasswordStrength] = useState(0);
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
@@ -43,20 +39,6 @@ export default function Login() {
   const navigate = useNavigate();
 
   const API_BASE_URL = "http://localhost:5000";
-
-  const calculatePasswordStrength = (pass) => {
-    let strength = 0;
-    if (pass.length >= 8) strength += 25;
-    if (/[A-Z]/.test(pass)) strength += 25;
-    if (/[0-9]/.test(pass)) strength += 25;
-    if (/[^A-Za-z0-9]/.test(pass)) strength += 25;
-    return strength;
-  };
-
-  const handlePasswordChange = (value) => {
-    setPassword(value);
-    setPasswordStrength(calculatePasswordStrength(value));
-  };
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -154,7 +136,7 @@ export default function Login() {
           firstname: firstName,
           lastname: lastName,
           email,
-          password,
+          phoneNumber,
           workingDomain,
           organization,
         }),
@@ -172,10 +154,9 @@ export default function Login() {
         setFirstName("");
         setLastName("");
         setEmail("");
-        setPassword("");
+        setPhoneNumber("");
         setWorkingDomain("");
         setOrganization("");
-        setPasswordStrength(0);
 
         // Switch to login tab
         setActiveTab("login");
@@ -388,70 +369,22 @@ export default function Login() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="registerPassword">Password</Label>
+                        <Label htmlFor="phoneNumber">Phone Number</Label>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <Input
-                            id="registerPassword"
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Create a password"
-                            value={password}
-                            onChange={(e) =>
-                              handlePasswordChange(e.target.value)
-                            }
-                            className="pl-10 pr-10"
+                            id="phoneNumber"
+                            type="tel"
+                            placeholder="Enter your phone number"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            className="pl-10"
                             required
                           />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-2 top-1 h-8 w-8 p-0"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
                         </div>
-
-                        {/* Password Strength */}
-                        {password && (
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs">
-                              <span>Password Strength</span>
-                              <span
-                                className={
-                                  passwordStrength >= 75
-                                    ? "text-success"
-                                    : passwordStrength >= 50
-                                    ? "text-warning"
-                                    : "text-destructive"
-                                }
-                              >
-                                {passwordStrength >= 75
-                                  ? "Strong"
-                                  : passwordStrength >= 50
-                                  ? "Medium"
-                                  : "Weak"}
-                              </span>
-                            </div>
-                            <div className="h-1 bg-muted rounded-full overflow-hidden">
-                              <div
-                                className={`h-full transition-all duration-300 ${
-                                  passwordStrength >= 75
-                                    ? "bg-success"
-                                    : passwordStrength >= 50
-                                    ? "bg-warning"
-                                    : "bg-destructive"
-                                }`}
-                                style={{ width: `${passwordStrength}%` }}
-                              />
-                            </div>
-                          </div>
-                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Enter a valid phone number (e.g., +1234567890 or 1234567890)
+                        </p>
                       </div>
 
                       <Button
