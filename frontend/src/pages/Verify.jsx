@@ -45,6 +45,10 @@ const PredictBBoxWidget = () => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [docType, setDocType] = useState(null); /*new line*/
+const [verificationResult, setVerificationResult] = useState(null); /*#new line*/
+
+
 
   const handleUpload = async () => {
     if (!image) return;
@@ -176,7 +180,7 @@ export default function Verify() {
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch(
-        "https://hackodisha-ocr-api.onrender.com/extract/",
+        "http://localhost:8000/extract",
         {
           method: "POST",
           body: formData,
