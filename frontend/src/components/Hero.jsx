@@ -65,9 +65,7 @@ export function Hero() {
               <span className="block">Verify</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl mx-auto">
-              OCR + registry verification + cryptographic proofs in a single
-              workflow. Protect academic integrity with government-grade
-              security.
+            A Single Secure Workflow for OCR, AI, and Registry Verification—Built to Government Standards..
             </p>
           </div>
 

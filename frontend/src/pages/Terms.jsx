@@ -21,9 +21,9 @@ export default function Terms() {
               Terms of Service
             </h1>
             <p className="text-xl text-muted-foreground">
-              Rules and guidelines for using the AuthenTech platform
+              Rules and guidelines for using the Doc Verfiy platform
             </p>
-            <Badge variant="secondary">Effective from: December 1, 2024</Badge>
+            <Badge variant="secondary">Effective from: December 1, 2025-2025</Badge>
           </div>
 
           {/* Content */}
@@ -203,17 +203,17 @@ export default function Terms() {
                 </p>
                 <div className="space-y-2 text-sm">
                   <p>
-                    <strong>Email:</strong> legal@authentech.com
+                    <strong>Email:</strong> legal@AURORAS.com
                   </p>
                   <p>
-                    <strong>Phone:</strong> +91-651-XXX-XXXX
+                    <strong>Phone:</strong> +91-000-XXX-XXXX
                   </p>
                   <p>
                     <strong>Address:</strong> Team AURORA
                     <br />
                     Technology Innovation Center
                     <br />
-                    Bhubaneswar - 751024, Odisha
+                    SUITE - 751024, mangalore, Karnataka, India
                   </p>
                 </div>
               </CardContent>

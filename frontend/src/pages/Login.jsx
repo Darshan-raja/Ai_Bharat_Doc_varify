@@ -204,7 +204,7 @@ export default function Login() {
             </div>
 
             <h2 className="text-4xl font-display font-bold mb-6">
-              Secure Academic Verification
+              Secure Documents Verification
             </h2>
             <p className="text-xl text-white/90 mb-8">
               Join thousands of institutions and verifiers using the most

@@ -49,13 +49,13 @@ const features = [
     icon: Zap,
     title: "Lightning Fast",
     description: "Complete verification in under 30 seconds",
-    badge: "< 30s"
+    badge: "< 120s"
   },
   {
     icon: Lock,
     title: "Privacy Protected",
-    description: "Data anonymization and GDPR compliant processing",
-    badge: "GDPR"
+    description: "Role-Based Access Control with Admin Approval–Gated Dashboard Access",
+    badge: "RBAC"
   },
   {
     icon: Clock,
