@@ -11,6 +11,7 @@ import {
   getPendingUsers,
   approveUser,
   rejectUser,
+  getUserStats,
 } from "../controllers/userController.js";
 import { userAuth } from "../middlewares/Auth.js";
 import { adminAuth } from "../middlewares/AdminAuth.js";
@@ -21,6 +22,7 @@ const router = express.Router();
 // Admin authentication
 router.post("/admin/authenticate", authenticateAdmin);
 router.get("/admin/pending-users", adminAuth, getPendingUsers);
+router.get("/admin/user-stats", adminAuth, getUserStats);
 router.post("/admin/approve-user", adminAuth, approveUser);
 router.post("/admin/reject-user", adminAuth, rejectUser);
 

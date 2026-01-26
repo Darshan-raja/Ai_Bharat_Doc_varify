@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import jwt from "jsonwebtoken";
@@ -33,7 +32,7 @@ export const registerUser = async (req, res) => {
       firstname,
       lastname,
       email,
-      password,
+      phoneNumber,
       workingDomain,
       organization,
     } = req.body;
@@ -42,27 +41,40 @@ export const registerUser = async (req, res) => {
       !firstname ||
       !lastname ||
       !email ||
-      !password ||
+      !phoneNumber ||
       !workingDomain ||
       !organization
     ) {
       return res.json({ success: false, message: "Please fill in all fields" });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: "User already registered" });
+    // Validate phone number format (at least 10 digits)
+    const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
+    const cleanedPhone = phoneNumber.replace(/\D/g, '');
+    if (cleanedPhone.length < 10) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Please enter a valid phone number (at least 10 digits)" 
+      });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Check if user already exists by email
+    const existingUserByEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingUserByEmail) {
+      return res.status(400).json({ success: false, message: "User with this email already registered" });
+    }
+
+    // Check if user already exists by phone number
+    const existingUserByPhone = await User.findOne({ phoneNumber: phoneNumber.trim() });
+    if (existingUserByPhone) {
+      return res.status(400).json({ success: false, message: "User with this phone number already registered" });
+    }
 
     const newUser = new User({
       firstname,
       lastname,
       email: email.toLowerCase(),
-      password: hashedPassword,
+      phoneNumber: phoneNumber.trim(),
       workingDomain,
       organization,
       status: 'pending', // New users are pending approval
@@ -82,6 +94,14 @@ export const registerUser = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    // Handle duplicate key error for phoneNumber
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ 
+        success: false, 
+        message: `User with this ${field === 'phoneNumber' ? 'phone number' : field} already exists` 
+      });
+    }
     res.json({ success: false, message: error.message });
   }
 };
@@ -130,13 +150,18 @@ export const sendLoginOTP = async (req, res) => {
         });
       }
 
-      // Update user with OTP details
-      user.otp = {
-        code: otpCode,
-        expiresAt,
-        sentTo: transporter ? ['email'] : []
-      };
-      await user.save();
+      // Update user with OTP details using findByIdAndUpdate to avoid full document validation
+      await User.findByIdAndUpdate(
+        user._id,
+        {
+          otp: {
+            code: otpCode,
+            expiresAt,
+            sentTo: transporter ? ['email'] : []
+          }
+        },
+        { runValidators: false } // Skip validation for backward compatibility with existing users
+      );
 
       const responsePayload = {
         success: true,
@@ -211,9 +236,12 @@ export const verifyLoginOTP = async (req, res) => {
       });
     }
 
-    // Clear the OTP after successful verification
-    user.otp = undefined;
-    await user.save();
+    // Clear the OTP after successful verification using findByIdAndUpdate to avoid full document validation
+    await User.findByIdAndUpdate(
+      user._id,
+      { $unset: { otp: "" } },
+      { runValidators: false } // Skip validation for backward compatibility with existing users
+    );
 
     // Generate JWT token
     if (!JWT_SECRET) {
@@ -402,7 +430,7 @@ export const authenticateAdmin = async (req, res) => {
 
 export const getPendingUsers = async (req, res) => {
   try {
-    const pendingUsers = await User.find({ status: 'pending' }).select('-password -otp');
+    const pendingUsers = await User.find({ status: 'pending' }).select('-otp');
 
     res.json({
       success: true,
@@ -490,6 +518,28 @@ export const rejectUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in rejectUser:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getUserStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const acceptedUsers = await User.countDocuments({ status: 'approved' });
+    const rejectedUsers = await User.countDocuments({ status: 'rejected' });
+    const pendingUsers = await User.countDocuments({ status: 'pending' });
+
+    res.json({
+      success: true,
+      data: {
+        total: totalUsers,
+        accepted: acceptedUsers,
+        rejected: rejectedUsers,
+        pending: pendingUsers
+      }
+    });
+  } catch (error) {
+    console.error("Error in getUserStats:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

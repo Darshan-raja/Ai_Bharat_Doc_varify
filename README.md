@@ -80,6 +80,11 @@ Frontend runs on `http://localhost:5173` (dev) or use production build
 #### Forge Detection
 
 ```bash
+ C:\Users\Darshan Raja\OneDrive\Desktop\aiedha-ui\Ai_Bharat_Doc_varify\ml\forge_detection> uvicorn main:app --reload --port 8000
+>>
+INFO:     Will watch for changes in these directories: ['C:\\Users\\Darshan Raja\\OneDrive\\Desktop\\aiedha-ui\\Ai_Bharat_Doc_varify\\ml\\forge_detection']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [25248] using StatReload
 cd ../ML/forge_detection
 pip install -r requirements.txt
 python main.py
