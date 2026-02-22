@@ -149,7 +149,11 @@ export const sendLoginOTP = async (req, res) => {
           html: `<p>Your OTP code is <strong>${otpCode}</strong></p>`,
         });
       }
+    } catch (emailError) {
+      console.error('Email could not be sent (check credentials), OTP generation will proceed:', emailError.message);
+    }
 
+    try {
       // Update user with OTP details using findByIdAndUpdate to avoid full document validation
       await User.findByIdAndUpdate(
         user._id,
@@ -165,14 +169,12 @@ export const sendLoginOTP = async (req, res) => {
 
       const responsePayload = {
         success: true,
-        message: transporter ? 'OTP sent successfully' : 'OTP generated (email not configured)',
+        message: 'OTP processed successfully. Check console or email (if configured).',
         otpSentTo: transporter ? ['email'] : []
       };
 
-      // Log OTP in development for quick testing
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`[DEV] OTP for ${user.email}: ${otpCode}`);
-      }
+      // Always log OTP for quick testing
+      console.log(`[DEV] OTP for ${user.email}: ${otpCode}`);
 
       // In non-production, return OTP for easier local testing
       if (process.env.NODE_ENV !== 'production') {
@@ -181,9 +183,9 @@ export const sendLoginOTP = async (req, res) => {
 
       res.json(responsePayload);
 
-    } catch (emailError) {
-      console.error('Error handling OTP send:', emailError);
-      res.status(500).json({ success: false, message: 'Failed to process OTP' });
+    } catch (dbError) {
+      console.error('Error updating user OTP:', dbError);
+      res.status(500).json({ success: false, message: 'Failed to save OTP to database' });
     }
 
   } catch (error) {

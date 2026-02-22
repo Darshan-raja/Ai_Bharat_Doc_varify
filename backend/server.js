@@ -20,6 +20,7 @@ const allowedOrigins = [
   "http://localhost:8081",
   "http://10.158.87.77:8081",
   "http://localhost:8080",
+  "http://localhost:9080",
   // Vite dev server default
   "http://localhost:5173"
 ];
