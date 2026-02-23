@@ -244,14 +244,11 @@ export default function Verify() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const token = localStorage.getItem("authToken");
       const response = await fetch(
-        "http://localhost:5000/api/documents/proxy/forge-detect",
+        "https://hackodisha-forge-detection-api-1.onrender.com/predict",
         {
           method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: formData,
-          credentials: "include",
         }
       );
 
