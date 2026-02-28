@@ -302,7 +302,7 @@ from dotenv import load_dotenv
 
 import google.generativeai as genai
 
-from pan_tampering import detect_pan_tampering
+from id_ocr import extract_text, detect_pan, detect_aadhaar, detect_passport, detect_cheque
 
 # ================= ENV =================
 load_dotenv()
@@ -332,115 +332,57 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ================= GEMINI OCR (ALL DOCUMENTS) =================
+# ================= GEMINI OCR (MARKSHEET ONLY) =================
 
 
 def extract_with_gemini(image_bytes: bytes):
     image_data = base64.b64encode(image_bytes).decode("utf-8")
 
     prompt = """
-You are an expert OCR and document classification system for Indian IDs and educational certificates.
+You are an expert OCR system for educational certificates and marksheets.
 
-First, strictly identify the document type from one of the following:
-- "PAN"
-- "AADHAAR"
-- "PASSPORT"
-- "MARKSHEET"
+If the document is an educational marksheet or certificate (degree, diploma, grade sheet, etc.), extract:
+- Name
+- Roll Number
+- Course
+- Branch
+- Year
+- CGPA
+- SGPA
+- Certificate Id
+- Institution
+- Issue Date
+- document_type: "MARKSHEET"
 
-If the document type is NOT one of the above (e.g. random photos, non-document images, etc), return exactly:
-{ "error": "Please enter a valid PAN, Aadhaar, Passport, or Marksheet document." }
-
-If the document is a "PAN", extract:
-- "document_type": "PAN"
-- "Name"
-- "PAN Number"
-- "Date of Birth"
-
-If the document is an "AADHAAR", extract:
-- "document_type": "AADHAAR"
-- "Name"
-- "Aadhaar Number" (format with spaces like: 1234 5678 9012)
-- "Date of Birth"
-- "Gender"
-
-If the document is a "PASSPORT", extract:
-- "document_type": "PASSPORT"
-- "Name" (Given Name + Surname)
-- "Passport Number"
-- "Date of Birth"
-- "Date of Issue"
-- "Date of Expiry"
-
-If the document is a "MARKSHEET" or educational certificate, extract:
-- "document_type": "MARKSHEET"
-- "Name"
-- "Roll Number"
-- "Course"
-- "Branch"
-- "Year"
-- "CGPA"
-- "SGPA"
-- "Certificate Id"
-- "Institution"
-- "Issue Date"
+If it is NOT a marksheet (like ID cards, photos, or other documents), return:
+{ "error": "Please enter an educational certificate." }
 
 Return STRICT JSON only. If a field is missing, set it to null.
-Do NOT include markdown formatting wrappers like `json`.
 """
 
     model = genai.GenerativeModel("gemini-2.5-flash")
-    
+    response = model.generate_content(
+        contents=[
+            {
+                "role": "user",
+                "parts": [
+                    prompt,
+                    {"mime_type": "image/png", "data": image_data}
+                ]
+            }
+        ]
+    )
+
     try:
-        response = model.generate_content(
-            contents=[
-                {
-                    "role": "user",
-                    "parts": [
-                        prompt,
-                        {"mime_type": "image/png", "data": image_data}
-                    ]
-                }
-            ]
-        )
-        
-        try:
-            return json.loads(response.text.strip())
-        except json.JSONDecodeError:
-            match = re.search(r"\{.*\}", response.text, re.DOTALL)
-            if match:
-                return json.loads(match.group())
-            return {"error": "Please enter a valid document."}
-            
-    except Exception as e:
-        error_msg = str(e)
-        if "API_KEY_INVALID" in error_msg or "expired" in error_msg.lower():
-            return {"error": "Your Gemini API Key has expired."}
-        elif "429" in error_msg or "quota" in error_msg.lower():
-            return {"error": "Google API Rate Limit Exceeded (15 requests/min). Please wait 1 minute.", "is_rate_limit": True}
-        return {"error": f"AI Extraction Error: {error_msg}"}
-
-# ================= LOCAL FALLBACK OCR =================
-# Used if Gemini hits a rate limit
-from id_ocr import extract_text, detect_pan, detect_aadhaar, detect_passport, detect_cheque
-
-def extract_with_local_ocr(image_path: str):
-    ocr_text = extract_text(image_path)
-    
-    pan = detect_pan(ocr_text)
-    if pan:
-        return {"document_type": "PAN", "PAN Number": pan["number"], "Name": pan["name"]}
-        
-    aadhaar = detect_aadhaar(ocr_text)
-    if aadhaar:
-        return {"document_type": "AADHAAR", "Aadhaar Number": aadhaar["number"], "Name": aadhaar["name"]}
-        
-    passport = detect_passport(ocr_text)
-    if passport:
-        return {"document_type": "PASSPORT", "Passport Number": passport["number"], "Name": passport["name"]}
-        
-    return {"error": "Local OCR could not detect document type (Marksheets require Gemini API)."}
+        return json.loads(response.text.strip())
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", response.text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+        return {"error": "Please enter an educational certificate."}
 
 # ================= API =================
+
 
 @app.post("/extract")
 async def extract_document(file: UploadFile = File(...)):
@@ -450,37 +392,78 @@ async def extract_document(file: UploadFile = File(...)):
 
     image_bytes = await file.read()
 
-    # Save image for tampering evaluation
+    # Save image
     os.makedirs("uploads", exist_ok=True)
     image_path = f"uploads/{uuid.uuid4()}.png"
     with open(image_path, "wb") as f:
         f.write(image_bytes)
 
-    # ================= GEMINI EXTRACTION =================
+    # ================= ID OCR FIRST (PAN / AADHAAR / PASSPORT / CHEQUE) =================
+    ocr_text = extract_text(image_path)
+
+    print("====================================")
+    print("OCR TEXT RAW:")
+    print(ocr_text)
+    print("====================================")
+
+    # Check for PAN card
+    pan = detect_pan(ocr_text)
+    if pan:
+        return JSONResponse(content={
+            "document_type": "PAN",
+            "PAN Number": pan["number"],
+            "Name": pan["name"],
+            "Date of Birth": None,
+            "final_status": "AUTHENTIC",
+            "message": "PAN card detected and verified"
+        })
+
+    # Check for Aadhaar card
+    aadhaar = detect_aadhaar(ocr_text)
+    if aadhaar:
+        # Format Aadhaar number with spaces for readability
+        formatted_aadhaar = f"{aadhaar['number'][:4]} {aadhaar['number'][4:8]} {aadhaar['number'][8:]}"
+        return JSONResponse(content={
+            "document_type": "AADHAAR",
+            "Aadhaar Number": formatted_aadhaar,
+            "Name": aadhaar["name"],
+            "Address": aadhaar["address"],
+            "final_status": "AUTHENTIC",
+            "message": "Aadhaar card detected and verified"
+        })
+
+    # Check for Passport
+    passport = detect_passport(ocr_text)
+    if passport:
+        return JSONResponse(content={
+            "document_type": "PASSPORT",
+            "Passport Number": passport["number"],
+            "Name": passport["name"],
+            "Date of Birth": None,
+            "Date of Issue": None,
+            "Date of Expiry": None,
+            "final_status": "AUTHENTIC",
+            "message": "Passport detected and verified"
+        })
+
+    # Check for Cheque
+    is_cheque = detect_cheque(ocr_text)
+    if is_cheque:
+        return JSONResponse(content={
+            "document_type": "CHEQUE",
+            "Bank Name": None,
+            "Account Number": None,
+            "IFSC Code": None,
+            "Cheque Number": None,
+            "final_status": "DETECTED",
+            "message": "Cheque/Check detected"
+        })
+
+    # ================= GEMINI FOR MARKSHEET =================
     data = extract_with_gemini(image_bytes)
 
     if "error" in data:
-        # If we hit a rate limit, try falling back to local OCR for ID cards
-        if data.get("is_rate_limit"):
-            local_data = extract_with_local_ocr(image_path)
-            if "error" not in local_data:
-                data = local_data # Fallback succeeded!
-            else:
-                return JSONResponse(content=data) # Fallback failed, return rate limit error
-        else:
-            return JSONResponse(content=data)
-        
-    # ================= TAMPERING DETECTION =================
-    # We run the image quality / tampering heuristics for ALL documents
-    tamper_info = detect_pan_tampering(image_path)
-    data.update(tamper_info)
+        return JSONResponse(content=data)
 
-    # Decide final status based on tampering score
-    if tamper_info.get("tampering_result") == "SUSPICIOUS":
-        data["final_status"] = "SUSPICIOUS"
-        data["message"] = f"Document quality suspicious or tampered. Detected as {data.get('document_type')}."
-    else:
-        data["final_status"] = "AUTHENTIC"
-        data["message"] = f"Authentic {data.get('document_type')} detected."
-
+    data["final_status"] = "EXTRACTED"
     return JSONResponse(content=data)
