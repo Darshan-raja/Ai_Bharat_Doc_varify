@@ -194,21 +194,17 @@ export default function Dashboard() {
       setExtractedData(null);
     }
   };
-  // Send uploaded file to verification API through backend proxy (avoids CORS)
+  // Send uploaded file to verification API
   const sendFileToVerificationAPI = async () => {
     if (!uploadedDoc) return;
     const formData = new FormData();
     formData.append("file", uploadedDoc);
-    const token = localStorage.getItem("authToken");
-
     try {
       const response = await fetch(
-        "http://localhost:5000/api/documents/proxy/forge-detect",
+        "https://hackodisha-forge-detection-api-1.onrender.com/predict",
         {
           method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: formData,
-          credentials: "include",
         }
       );
       const result = await response.json();
