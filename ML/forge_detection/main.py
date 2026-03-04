@@ -326,6 +326,10 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:9080",
         "http://127.0.0.1:9080",
+        "http://localhost:9081",
+        "http://127.0.0.1:9081",
+        "http://localhost:5173",
+        "http://localhost:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -341,20 +345,32 @@ def extract_with_gemini(image_bytes: bytes):
     prompt = """
 You are an expert OCR and document classification system for Indian IDs and educational certificates.
 
-First, strictly identify the document type from one of the following:
-- "PAN"
-- "AADHAAR"
-- "PASSPORT"
-- "MARKSHEET"
+First, strictly identify the document type based on the presence of keywords in the document. Follow this EXACT priority order:
+1. "MARKSHEET": If the document contains words like "Grade Card", "University", "Board", "Marks", "CGPA", "SGPA", subjects, or credits. (Even if it has a small serial number, DO NOT call it a Passport or PAN).
+2. "PAN": If the document contains "INCOME TAX DEPARTMENT", "GOVT. OF INDIA", "Permanent Account Number".
+3. "AADHAAR": If the document contains "Unique Identification Authority of India", "Government of India", or a 12-digit format grouped as "XXXX XXXX XXXX".
+4. "PASSPORT": If the document contains "REPUBLIC OF INDIA", "PASSPORT", and has a Machine Readable Zone (MRZ) with '<<<<<' chevrons.
 
-If the document type is NOT one of the above (e.g. random photos, non-document images, etc), return exactly:
+If none of these apply, return exactly:
 { "error": "Please enter a valid PAN, Aadhaar, Passport, or Marksheet document." }
+
+Second, perform a highly critical visual forensic analysis to detect forgeries. You are analyzing digital uploads where forgery is common.
+BE EXTREMELY STRICT. Flag "forgery_status" as "SUSPICIOUS" if you detect ANY of the following:
+- Mismatched fonts, irregular character spacing, or text that looks perfectly typed over a noisy background (text insertion).
+- Compression artifacts or blurriness that is localized ONLY around names, dates, or ID numbers, while the rest of the image is clear.
+- Explicit watermarks or stamps saying "FAKE", "DUMMY", "SAMPLE", or if the photo looks like it was pasted digitally.
+- Missing holograms or lack of standard security features for that specific ID type.
+If everything looks completely natural, consistent, and unaltered, mark it as "AUTHENTIC".
+
+Based on this analysis, determine the "forgery_status" as exactly either "AUTHENTIC" or "SUSPICIOUS", and provide a detailed "forgery_reason" explaining your finding.
 
 If the document is a "PAN", extract:
 - "document_type": "PAN"
 - "Name"
 - "PAN Number"
 - "Date of Birth"
+- "forgery_status"
+- "forgery_reason"
 
 If the document is an "AADHAAR", extract:
 - "document_type": "AADHAAR"
@@ -362,6 +378,8 @@ If the document is an "AADHAAR", extract:
 - "Aadhaar Number" (format with spaces like: 1234 5678 9012)
 - "Date of Birth"
 - "Gender"
+- "forgery_status"
+- "forgery_reason"
 
 If the document is a "PASSPORT", extract:
 - "document_type": "PASSPORT"
@@ -370,6 +388,8 @@ If the document is a "PASSPORT", extract:
 - "Date of Birth"
 - "Date of Issue"
 - "Date of Expiry"
+- "forgery_status"
+- "forgery_reason"
 
 If the document is a "MARKSHEET" or educational certificate, extract:
 - "document_type": "MARKSHEET"
@@ -383,6 +403,8 @@ If the document is a "MARKSHEET" or educational certificate, extract:
 - "Certificate Id"
 - "Institution"
 - "Issue Date"
+- "forgery_status"
+- "forgery_reason"
 
 Return STRICT JSON only. If a field is missing, set it to null.
 Do NOT include markdown formatting wrappers like `json`.
@@ -445,8 +467,8 @@ def extract_with_local_ocr(image_path: str):
 @app.post("/extract")
 async def extract_document(file: UploadFile = File(...)):
 
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File must be an image")
+    if not file.content_type.startswith("image/") and not file.content_type == "application/octet-stream":
+        raise HTTPException(status_code=400, detail=f"File must be an image, got {file.content_type}")
 
     image_bytes = await file.read()
 
@@ -475,10 +497,14 @@ async def extract_document(file: UploadFile = File(...)):
     tamper_info = detect_pan_tampering(image_path)
     data.update(tamper_info)
 
-    # Decide final status based on tampering score
-    if tamper_info.get("tampering_result") == "SUSPICIOUS":
+    # Decide final status based on tampering score OR Gemini's analysis
+    is_gemini_suspicious = data.get("forgery_status") == "SUSPICIOUS"
+    is_cv2_suspicious = tamper_info.get("tampering_result") == "SUSPICIOUS"
+    
+    if is_gemini_suspicious or is_cv2_suspicious:
         data["final_status"] = "SUSPICIOUS"
-        data["message"] = f"Document quality suspicious or tampered. Detected as {data.get('document_type')}."
+        reason = data.get("forgery_reason") if is_gemini_suspicious else tamper_info.get("details", "Image quality issues.")
+        data["message"] = f"Document quality suspicious or tampered ({reason}). Detected as {data.get('document_type')}."
     else:
         data["final_status"] = "AUTHENTIC"
         data["message"] = f"Authentic {data.get('document_type')} detected."

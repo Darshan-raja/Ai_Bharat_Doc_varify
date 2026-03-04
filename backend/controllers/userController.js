@@ -174,7 +174,9 @@ export const sendLoginOTP = async (req, res) => {
       };
 
       // Always log OTP for quick testing
-      console.log(`[DEV] OTP for ${user.email}: ${otpCode}`);
+      console.log('\n=========================================');
+      console.log(`🔐 OTP for ${user.email} IS: ${otpCode}`);
+      console.log('=========================================\n');
 
       // In non-production, return OTP for easier local testing
       if (process.env.NODE_ENV !== 'production') {
