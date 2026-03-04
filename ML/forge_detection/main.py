@@ -326,10 +326,6 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:9080",
         "http://127.0.0.1:9080",
-        "http://localhost:9081",
-        "http://127.0.0.1:9081",
-        "http://localhost:5173",
-        "http://localhost:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -418,8 +414,8 @@ Return STRICT JSON only. If a field is missing, set it to null.
 @app.post("/extract")
 async def extract_document(file: UploadFile = File(...)):
 
-    if not file.content_type.startswith("image/") and not file.content_type == "application/octet-stream":
-        raise HTTPException(status_code=400, detail=f"File must be an image, got {file.content_type}")
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image")
 
     image_bytes = await file.read()
 

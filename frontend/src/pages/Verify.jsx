@@ -201,16 +201,8 @@ export default function Verify() {
       }
 
       setOcrData(ocrResult);
-      console.log("OCR Result:", ocrResult.Name, ocrResult.document_type);
-      if (ocrResult.document_type && !ocrResult.error) {
-        let institutionLabel = ocrResult.Institution;
-        if (!institutionLabel) {
-          if (ocrResult.document_type === "PASSPORT") institutionLabel = "Government of India (Passport)";
-          else if (ocrResult.document_type === "PAN") institutionLabel = "Government of India (PAN)";
-          else if (ocrResult.document_type === "AADHAAR") institutionLabel = "Government of India (Aadhaar)";
-          else institutionLabel = ocrResult.document_type || "Unknown Document";
-        }
-        
+      console.log("OCR Result:", ocrResult.Name, ocrResult.Institution);
+      if (ocrResult.Name && ocrResult.Institution) {
         const token = localStorage.getItem("authToken");
         fetch(
           "http://localhost:5000/api/users/results",
@@ -221,8 +213,8 @@ export default function Verify() {
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({
-              name: ocrResult.Name || "Unknown Name",
-              institution: institutionLabel,
+              name: ocrResult.Name,
+              institution: ocrResult.Institution,
             }),
             credentials: "include",
           }

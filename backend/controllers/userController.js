@@ -169,17 +169,10 @@ export const sendLoginOTP = async (req, res) => {
         otpSentTo: transporter ? ['email'] : []
       };
 
-<<<<<<< HEAD
-      // Always log OTP for quick testing
-      console.log('\n=========================================');
-      console.log(`🔐 OTP for ${user.email} IS: ${otpCode}`);
-      console.log('=========================================\n');
-=======
       // Log OTP in development for quick testing
       if (process.env.NODE_ENV !== 'production') {
         console.log(`[DEV] OTP for ${user.email}: ${otpCode}`);
       }
->>>>>>> 025be39b446b902948588de2463c8980684b2034
 
       // In non-production, return OTP for easier local testing
       if (process.env.NODE_ENV !== 'production') {

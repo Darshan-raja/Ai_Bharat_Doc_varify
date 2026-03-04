@@ -23,28 +23,6 @@ export default function VerifyPAN() {
 
     const data = await res.json();
     setResult(data);
-    
-    // Save to user history if authentic/extracted
-    if (data.document_type && !data.error) {
-      const token = localStorage.getItem("authToken");
-      try {
-        await fetch("http://localhost:5000/api/users/results", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            name: data.Name || "Unknown Name",
-            institution: "Government of India (PAN)",
-          }),
-          credentials: "include",
-        });
-      } catch (err) {
-        console.error("DB store error:", err);
-      }
-    }
-    
     setLoading(false);
   };
 
