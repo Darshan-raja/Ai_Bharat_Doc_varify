@@ -59,10 +59,10 @@ export function Hero() {
             className="space-y-4 animate-slide-up"
             style={{ animationDelay: "0.2s" }}
           >
-            <h1 className="text-5xl md:text-7xl font-display font-bold leading-tight">
-            Ai Bharat
-              <span className="block text-accent-light">Documention </span>
-              <span className="block">Verify</span>
+            <h1 className="text-5xl md:text-7xl font-display font-bold leading-tight  ">
+            BHARAT VERIFY
+              <span className="block text-accent-light">AI IDENTITY PROOF </span>
+              <span className="block">CHECKER</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl mx-auto">
             A Single Secure Workflow for OCR, AI, and Registry Verification—Built to Government Standards..

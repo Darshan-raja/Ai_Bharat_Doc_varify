@@ -303,6 +303,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 
 from id_ocr import extract_text, detect_pan, detect_aadhaar, detect_passport, detect_cheque
+from pan_tampering import detect_pan_tampering
 
 # ================= ENV =================
 load_dotenv()
@@ -494,12 +495,13 @@ async def extract_document(file: UploadFile = File(...)):
         if data.get("is_rate_limit"):
             local_data = extract_with_local_ocr(image_path)
             if "error" not in local_data:
-                data = local_data # Fallback succeeded!
+                data = local_data  # Fallback succeeded!
             else:
-                return JSONResponse(content=data) # Fallback failed, return rate limit error
+                # Fallback failed, return rate limit error
+                return JSONResponse(content=data)
         else:
             return JSONResponse(content=data)
-        
+
     # ================= TAMPERING DETECTION =================
     # We run the image quality / tampering heuristics for ALL documents
     tamper_info = detect_pan_tampering(image_path)
