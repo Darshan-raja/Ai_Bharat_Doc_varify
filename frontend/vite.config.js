@@ -13,6 +13,16 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 9080,
+    proxy: {
+      "/api": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
+      "/ocr": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     react(),

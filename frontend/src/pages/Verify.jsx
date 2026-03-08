@@ -180,7 +180,7 @@ export default function Verify() {
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch(
-        "http://localhost:8000/extract",
+        "/ocr/extract",
         {
           method: "POST",
           body: formData,
@@ -205,7 +205,7 @@ export default function Verify() {
       if (ocrResult.Name && ocrResult.Institution) {
         const token = localStorage.getItem("authToken");
         fetch(
-          "http://localhost:5000/api/users/results",
+          `/api/users/results`,
           {
             method: "POST",
             headers: {
