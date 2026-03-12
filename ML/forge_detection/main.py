@@ -294,6 +294,7 @@ import re
 import uuid
 import json
 import base64
+from datetime import datetime, date
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
@@ -313,6 +314,39 @@ if not GEMINI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY not set in .env")
 
 genai.configure(api_key=GEMINI_API_KEY)
+
+# ================= API QUOTA TRACKING =================
+DAILY_LIMIT = 20  # Free tier limit for gemini-2.5-flash
+api_usage = {
+    "date": str(date.today()),
+    "count": 0
+}
+
+
+def get_quota_status():
+    """Get current API quota status"""
+    # Reset counter if it's a new day
+    if api_usage["date"] != str(date.today()):
+        api_usage["date"] = str(date.today())
+        api_usage["count"] = 0
+
+    remaining = DAILY_LIMIT - api_usage["count"]
+    return {
+        "daily_limit": DAILY_LIMIT,
+        "used": api_usage["count"],
+        "remaining": max(0, remaining),
+        "is_exhausted": remaining <= 0,
+        "warning": remaining <= 5 and remaining > 0
+    }
+
+
+def increment_usage():
+    """Increment API usage counter"""
+    if api_usage["date"] != str(date.today()):
+        api_usage["date"] = str(date.today())
+        api_usage["count"] = 0
+    api_usage["count"] += 1
+
 
 # ================= APP =================
 app = FastAPI(
@@ -412,8 +446,26 @@ Return STRICT JSON only. If a field is missing, set it to null.
 # ================= API =================
 
 
+@app.get("/ocr/quota")
+async def get_api_quota():
+    """Check API quota status before uploading"""
+    return JSONResponse(content=get_quota_status())
+
+
 @app.post("/ocr/extract")
 async def extract_document(file: UploadFile = File(...)):
+
+    # Check quota before processing
+    quota = get_quota_status()
+    if quota["is_exhausted"]:
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "API limit exhausted",
+                "message": f"Daily limit of {DAILY_LIMIT} requests reached. Please try again tomorrow.",
+                "quota": quota
+            }
+        )
 
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image")
@@ -434,47 +486,26 @@ async def extract_document(file: UploadFile = File(...)):
     print(ocr_text)
     print("====================================")
 
-    # Check for PAN card
+    # Check for PAN card (use local OCR only for PAN - it works well)
     pan = detect_pan(ocr_text)
     if pan:
+        # For PAN, also run tampering detection
+        tamper_info = detect_pan_tampering(image_path)
         return JSONResponse(content={
             "document_type": "PAN",
             "PAN Number": pan["number"],
             "Name": pan["name"],
             "Date of Birth": None,
-            "final_status": "AUTHENTIC",
+            "tampering_result": tamper_info.get("tampering_result"),
+            "tampering_score": tamper_info.get("tampering_score"),
+            "final_status": "AUTHENTIC" if tamper_info.get("tampering_result") == "AUTHENTIC" else "SUSPICIOUS",
             "message": "PAN card detected and verified"
         })
 
-    # Check for Aadhaar card
-    aadhaar = detect_aadhaar(ocr_text)
-    if aadhaar:
-        # Format Aadhaar number with spaces for readability
-        formatted_aadhaar = f"{aadhaar['number'][:4]} {aadhaar['number'][4:8]} {aadhaar['number'][8:]}"
-        return JSONResponse(content={
-            "document_type": "AADHAAR",
-            "Aadhaar Number": formatted_aadhaar,
-            "Name": aadhaar["name"],
-            "Address": aadhaar["address"],
-            "final_status": "AUTHENTIC",
-            "message": "Aadhaar card detected and verified"
-        })
+    # For Aadhaar, Passport, and other documents - use Gemini for better accuracy
+    # (Local OCR gives incomplete name and sometimes wrong numbers)
 
-    # Check for Passport
-    passport = detect_passport(ocr_text)
-    if passport:
-        return JSONResponse(content={
-            "document_type": "PASSPORT",
-            "Passport Number": passport["number"],
-            "Name": passport["name"],
-            "Date of Birth": None,
-            "Date of Issue": None,
-            "Date of Expiry": None,
-            "final_status": "AUTHENTIC",
-            "message": "Passport detected and verified"
-        })
-
-    # Check for Cheque
+    # Check for Cheque only (simple keyword detection is enough)
     is_cheque = detect_cheque(ocr_text)
     if is_cheque:
         return JSONResponse(content={
@@ -489,18 +520,10 @@ async def extract_document(file: UploadFile = File(...)):
 
     # ================= GEMINI FOR MARKSHEET =================
     data = extract_with_gemini(image_bytes)
+    increment_usage()  # Track API usage
 
     if "error" in data:
-        # If we hit a rate limit, try falling back to local OCR for ID cards
-        if data.get("is_rate_limit"):
-            local_data = extract_with_local_ocr(image_path)
-            if "error" not in local_data:
-                data = local_data  # Fallback succeeded!
-            else:
-                # Fallback failed, return rate limit error
-                return JSONResponse(content=data)
-        else:
-            return JSONResponse(content=data)
+        return JSONResponse(content=data)
 
     # ================= TAMPERING DETECTION =================
     # We run the image quality / tampering heuristics for ALL documents

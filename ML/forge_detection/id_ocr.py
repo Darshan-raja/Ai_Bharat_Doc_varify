@@ -1,12 +1,59 @@
 import easyocr
 import re
+import cv2
+import numpy as np
 
+# Initialize reader with English only (Hindi model can cause issues)
 reader = easyocr.Reader(['en'], gpu=False)
 
 
+def preprocess_image(image_path):
+    """Preprocess image for better OCR accuracy"""
+    try:
+        img = cv2.imread(image_path)
+        if img is None:
+            return None
+
+        # Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # Apply adaptive thresholding to handle different lighting
+        thresh = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+        )
+
+        # Denoise
+        denoised = cv2.fastNlMeansDenoising(thresh, None, 10, 7, 21)
+
+        return denoised
+    except Exception as e:
+        print(f"Preprocessing error: {e}")
+        return None
+
+
 def extract_text(image_path):
-    results = reader.readtext(image_path, detail=0)
-    return " ".join(results).upper()
+    """Extract text with preprocessing for more consistent results"""
+    try:
+        # Try with preprocessed image first
+        preprocessed = preprocess_image(image_path)
+
+        if preprocessed is not None:
+            # Run OCR on preprocessed image
+            results = reader.readtext(preprocessed, detail=0)
+            text1 = " ".join(results).upper()
+
+            # Also run on original for comparison
+            results2 = reader.readtext(image_path, detail=0)
+            text2 = " ".join(results2).upper()
+
+            # Return the longer result (usually more complete)
+            return text1 if len(text1) >= len(text2) else text2
+        else:
+            results = reader.readtext(image_path, detail=0)
+            return " ".join(results).upper()
+    except Exception as e:
+        print(f"OCR error: {e}")
+        return ""
 
 
 def extract_name_from_text(text):
@@ -86,12 +133,44 @@ def detect_pan(text):
 
 
 def detect_aadhaar(text):
-    """Detect Aadhaar and extract details"""
-    text_clean = text.replace(" ", "")
-    match = re.search(r"[2-9][0-9]{11}", text_clean)
+    """Detect Aadhaar and extract details - improved version"""
 
-    if match:
-        aadhaar_number = match.group()
+    # First check if it's likely an Aadhaar card by keywords
+    aadhaar_keywords = ["AADHAAR", "AADHAR",
+                        "आधार", "UIDAI", "UNIQUE IDENTIFICATION"]
+    is_likely_aadhaar = any(keyword in text.upper()
+                            for keyword in aadhaar_keywords)
+
+    # Clean text - remove spaces and common OCR errors
+    text_clean = text.replace(" ", "").replace("O", "0").replace("o", "0")
+    text_clean = text_clean.replace(
+        "I", "1").replace("l", "1").replace("|", "1")
+    text_clean = text_clean.replace("S", "5").replace("B", "8")
+
+    # Try multiple patterns for Aadhaar number
+    patterns = [
+        r"[2-9][0-9]{11}",  # Standard 12-digit starting with 2-9
+        r"[2-9][0-9]{3}\s*[0-9]{4}\s*[0-9]{4}",  # With spaces: XXXX XXXX XXXX
+    ]
+
+    aadhaar_number = None
+
+    # First try with cleaned text
+    for pattern in patterns:
+        match = re.search(pattern, text_clean)
+        if match:
+            aadhaar_number = re.sub(
+                r"\s", "", match.group())  # Remove any spaces
+            break
+
+    # If not found, try original text with spaces pattern
+    if not aadhaar_number:
+        spaced_match = re.search(r"[2-9]\d{3}\s+\d{4}\s+\d{4}", text)
+        if spaced_match:
+            aadhaar_number = re.sub(r"\s", "", spaced_match.group())
+
+    # Validate: Aadhaar should be exactly 12 digits and start with 2-9
+    if aadhaar_number and len(aadhaar_number) == 12 and aadhaar_number[0] in "23456789":
         name = extract_name_from_text(text)
         address = extract_address_from_text(text)
         return {
@@ -99,6 +178,23 @@ def detect_aadhaar(text):
             "name": name,
             "address": address
         }
+
+    # If we found Aadhaar keywords but no valid number, still try to extract
+    if is_likely_aadhaar:
+        # Try finding any 12-digit sequence
+        all_digits = re.findall(r"\d+", text_clean)
+        combined = "".join(all_digits)
+        for i in range(len(combined) - 11):
+            potential = combined[i:i+12]
+            if potential[0] in "23456789":
+                name = extract_name_from_text(text)
+                address = extract_address_from_text(text)
+                return {
+                    "number": potential,
+                    "name": name,
+                    "address": address
+                }
+
     return None
 
 
