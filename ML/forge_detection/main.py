@@ -412,7 +412,7 @@ Return STRICT JSON only. If a field is missing, set it to null.
 # ================= API =================
 
 
-@app.post("/extract")
+@app.post("/ocr/extract")
 async def extract_document(file: UploadFile = File(...)):
 
     if not file.content_type.startswith("image/"):
