@@ -230,14 +230,15 @@ Create a `Dockerfile` for containerized deployment
 ISC License
 
 ## 👥 Contributors
-FE frontebd BE backend ML
-- Darshan Raja (BE, AIML )( Team Leader)
-- vinyak (FE) 
-- Prajwal(BE) 
-- Divya (UIUX) (@Darshan-raja)
+
+- Darshan Raja (@Darshan-raja)
 
 ## 📞 Support
 
 For issues, questions, or suggestions, please open an issue on GitHub.
 
 ---
+
+**Last Updated:** December 23, 2025
+
+**Note:** This project is still in development. See [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) for deployment preparation steps.
