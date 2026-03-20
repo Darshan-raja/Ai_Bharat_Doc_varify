@@ -798,152 +798,195 @@ export default function Verify() {
     <div className="min-h-screen bg-gradient-to-br from-background via-card-glass to-accent/5">
       <Navbar />
 
-      <div className="container py-8">
+      <div className="container py-12">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-display font-bold mb-4">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center space-x-2 mb-4">
+              <Shield className="h-8 w-8 text-primary" />
+              <span className="text-sm font-semibold text-primary uppercase tracking-wide">Verification System</span>
+            </div>
+            <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               Document Verification Workspace
             </h1>
-            <p className="text-xl text-muted-foreground">
-              Upload your academic certificate for instant verification
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Upload your academic certificate for instant AI-powered verification and authenticity analysis
             </p>
           </div>
 
           {/* Progress Indicator */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    verificationStep >= 1
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {verificationStep >= 1 ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
-                  )}
+          <div className="mb-12 px-4">
+            <div className="bg-card/60 backdrop-blur-sm border border-primary/20 rounded-xl p-6">
+              <div className="flex items-center justify-between gap-8">
+                {/* Step 1 */}
+                <div className="flex items-center flex-1 group">
+                  <div
+                    className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
+                      verificationStep >= 1
+                        ? "bg-primary text-primary-foreground scale-110"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {verificationStep >= 1 ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : (
+                      <span className="text-sm">1</span>
+                    )}
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-semibold">Upload</p>
+                    <p className="text-xs text-muted-foreground">Select document</p>
+                  </div>
                 </div>
-                <span className="font-medium">Upload</span>
-              </div>
 
-              <div className="flex items-center space-x-2">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    verificationStep >= 2
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {verificationStep >= 2 ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    <Scan className="h-4 w-4" />
-                  )}
-                </div>
-                <span className="font-medium">Extract</span>
-              </div>
+                {/* Divider */}
+                <div className={`h-1 flex-1 rounded-full transition-all duration-300 ${verificationStep >= 2 ? "bg-primary" : "bg-border"}`}></div>
 
-              <div className="flex items-center space-x-2">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    verificationStep >= 3
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {verificationStep >= 3 ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    <Shield className="h-4 w-4" />
-                  )}
+                {/* Step 2 */}
+                <div className="flex items-center flex-1 group">
+                  <div
+                    className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
+                      verificationStep >= 2
+                        ? "bg-primary text-primary-foreground scale-110"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {verificationStep >= 2 ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : (
+                      <span className="text-sm">2</span>
+                    )}
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-semibold">Extract</p>
+                    <p className="text-xs text-muted-foreground">Scan text</p>
+                  </div>
                 </div>
-                <span className="font-medium">Verify</span>
+
+                {/* Divider */}
+                <div className={`h-1 flex-1 rounded-full transition-all duration-300 ${verificationStep >= 3 ? "bg-primary" : "bg-border"}`}></div>
+
+                {/* Step 3 */}
+                <div className="flex items-center flex-1 group">
+                  <div
+                    className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
+                      verificationStep >= 3
+                        ? "bg-primary text-primary-foreground scale-110"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {verificationStep >= 3 ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : (
+                      <span className="text-sm">3</span>
+                    )}
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-semibold">Verify</p>
+                    <p className="text-xs text-muted-foreground">Get results</p>
+                  </div>
+                </div>
               </div>
             </div>
-            <Progress value={(verificationStep / 3) * 100} className="h-2" />
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Panel 1: Upload & Capture */}
-            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-card shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Upload className="h-5 w-5" />
+            <Card className="border-primary/30 bg-gradient-to-br from-primary/8 via-card to-card/80 backdrop-blur-sm hover-lift">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-3 text-lg">
+                  <div className="p-2 bg-primary/20 rounded-lg">
+                    <Upload className="h-5 w-5 text-primary" />
+                  </div>
                   <span>Upload Document</span>
                 </CardTitle>
+                <p className="text-xs text-muted-foreground mt-2">Select your certificate to verify</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 {!uploadedFile ? (
                   <div
                     {...getRootProps()}
-                    className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                    className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-300 ${
                       isDragActive
-                        ? "border-primary bg-primary/5"
-                        : "border-muted-foreground/25 hover:border-primary/50"
+                        ? "border-primary bg-primary/10 scale-[1.02]"
+                        : "border-primary/30 hover:border-primary/60 hover:bg-primary/5"
                     }`}
                   >
                     <input {...getInputProps()} />
-                    <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-lg font-medium mb-2">
-                      Drop certificate here
+                    <div className="flex justify-center mb-4">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-primary/30 blur-lg rounded-full animate-pulse"></div>
+                        <Upload className="h-14 w-14 text-primary relative" />
+                      </div>
+                    </div>
+                    <p className="text-lg font-semibold mb-1">
+                      Drop your certificate
                     </p>
                     <p className="text-sm text-muted-foreground mb-4">
-                      or click to browse files
+                      or click to browse from your device
                     </p>
-                    <Badge variant="outline">PDF, JPG, PNG up to 10MB</Badge>
+                    <Badge className="bg-primary/20 text-primary hover:bg-primary/30">
+                      <FileText className="h-3 w-3 mr-1" />
+                      PDF, JPG, PNG • Up to 10MB
+                    </Badge>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex items-center space-x-3 p-4 bg-muted rounded-lg">
-                      <FileText className="h-8 w-8 text-primary" />
-                      <div className="flex-1">
-                        <p className="font-medium">{uploadedFile.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
+                    {/* File Preview Card */}
+                    <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 to-accent/5 border border-primary/20 p-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-primary/20 rounded-lg">
+                          <FileText className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm truncate">{uploadedFile.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={resetVerification}
+                          className="hover:bg-destructive/20 hover:text-destructive"
+                        >
+                          <XCircle className="h-5 w-5" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={resetVerification}
-                      >
-                        <XCircle className="h-4 w-4" />
-                      </Button>
                     </div>
 
                     {/* Choose New Document Button */}
                     <div
                       {...getRootProps()}
-                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center cursor-pointer transition-colors hover:border-primary/50 hover:bg-primary/5"
+                      className="border-2 border-dashed border-primary/20 rounded-xl p-6 text-center cursor-pointer transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 group"
                     >
                       <input {...getInputProps()} />
-                      <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2 group-hover:text-primary transition-colors" />
                       <p className="text-sm font-medium mb-1">
-                        Choose New Document
+                        Choose Different Document
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Click or drop to upload a different file
+                        Click or drag to replace file
                       </p>
                     </div>
 
                     {/* Processing Status */}
                     {(isProcessingOCR || isProcessingVerification) && (
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 animate-spin" />
-                          <span className="text-sm">
+                      <div className="space-y-3 pt-2">
+                        <div className="flex items-center space-x-3 text-sm">
+                          <div className="relative flex h-4 w-4">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-4 w-4 bg-primary"></span>
+                          </div>
+                          <span className="font-medium text-primary">
                             {isProcessingOCR
-                              ? "Extracting text..."
-                              : "Verifying document..."}
+                              ? "Extracting document data..."
+                              : "Verifying authenticity..."}
                           </span>
                         </div>
                         <Progress
                           value={isProcessingOCR ? 50 : 90}
-                          className="h-1"
+                          className="h-2"
                         />
                       </div>
                     )}
@@ -953,106 +996,127 @@ export default function Verify() {
             </Card>
 
             {/* Panel 2: OCR & Preview */}
-            <Card className="border-primary/20 bg-gradient-to-br from-accent/5 to-card shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Scan className="h-5 w-5" />
+            <Card className="border-accent/30 bg-gradient-to-br from-accent/8 via-card to-card/80 backdrop-blur-sm hover-lift">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-3 text-lg">
+                  <div className="p-2 bg-accent/20 rounded-lg">
+                    <Scan className="h-5 w-5 text-accent" />
+                  </div>
                   <span>Extracted Data</span>
                 </CardTitle>
+                <p className="text-xs text-muted-foreground mt-2">OCR text recognition results</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isProcessingOCR ? (
-                  <div className="text-center py-8">
-                    <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-spin" />
-                    <p className="text-muted-foreground">
-                      Extracting text from document...
-                    </p>
+                  <div className="text-center py-12">
+                    <div className="relative flex justify-center mb-4">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full border-4 border-accent/20 border-t-accent animate-spin"></div>
+                      </div>
+                      <Scan className="h-8 w-8 text-accent relative z-10" />
+                    </div>
+                    <p className="font-medium text-foreground">Extracting text...</p>
+                    <p className="text-xs text-muted-foreground mt-1">Analyzing document content</p>
                   </div>
                 ) : ocrData ? (
                   <div className="space-y-3">
-                    {Object.entries(ocrData).map(([key, value]) => (
+                    {Object.entries(ocrData).map(([key, value], index) => (
                       <div
                         key={key}
-                        className="flex justify-between items-center p-2 bg-muted/50 rounded"
+                        className="group p-3 bg-gradient-to-r from-accent/5 to-transparent rounded-lg border border-accent/20 hover:border-accent/50 transition-all duration-300 hover:bg-accent/10"
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        <span className="text-sm font-medium capitalize">
-                          {key.replace(/([A-Z])/g, " $1")}:
-                        </span>
-                        <span className="text-sm">{String(value)}</span>
+                        <div className="flex items-start justify-between">
+                          <span className="text-xs font-semibold text-accent uppercase tracking-wide">
+                            {key.replace(/([A-Z])/g, " $1").trim()}
+                          </span>
+                          <Copy className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" />
+                        </div>
+                        <p className="text-sm font-medium text-foreground mt-2 break-words">
+                          {String(value)}
+                        </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <Scan className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      Upload a document to see extracted data
-                    </p>
+                  <div className="text-center py-12">
+                    <div className="relative flex justify-center mb-4">
+                      <div className="absolute inset-0 bg-accent/20 blur-xl rounded-full opacity-50"></div>
+                      <Scan className="h-12 w-12 text-accent/40 relative" />
+                    </div>
+                    <p className="font-medium text-foreground">Waiting for upload</p>
+                    <p className="text-xs text-muted-foreground mt-1">Extracted data will appear here</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
             {/* Panel 3: Verification Results */}
-            <Card className="border-primary/20 bg-gradient-to-br from-secondary/5 to-card shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Shield className="h-5 w-5" />
+            <Card className="border-secondary/30 bg-gradient-to-br from-secondary/8 via-card to-card/80 backdrop-blur-sm hover-lift lg:col-span-1">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center space-x-3 text-lg">
+                  <div className="p-2 bg-secondary/20 rounded-lg">
+                    <Shield className="h-5 w-5 text-secondary" />
+                  </div>
                   <span>Verification Result</span>
                 </CardTitle>
+                <p className="text-xs text-muted-foreground mt-2">Authentication analysis</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isProcessingVerification ? (
-                  <div className="text-center py-8">
-                    <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
-                    <p className="text-muted-foreground">
-                      Analyzing document authenticity...
-                    </p>
+                  <div className="text-center py-12">
+                    <div className="relative inline-block mb-4">
+                      <div className="absolute inset-0 bg-secondary/30 blur-lg rounded-full animate-pulse"></div>
+                      <Shield className="h-12 w-12 text-secondary relative animate-bounce" />
+                    </div>
+                    <p className="font-medium text-foreground">Verifying authenticity...</p>
+                    <p className="text-xs text-muted-foreground mt-1">Using AI detection model</p>
                   </div>
                 ) : verificationResult ? (
                   <div className="space-y-4">
                     {/* Status Badge */}
                     <div className="text-center">
-                      <Badge
-                        variant={
-                          verificationResult.status === "valid"
-                            ? "default"
-                            : "destructive"
-                        }
-                        className="text-lg px-4 py-2"
-                      >
+                      <div className={`inline-flex items-center space-x-2 px-4 py-3 rounded-xl font-semibold text-sm uppercase tracking-wide ${
+                        verificationResult.status === "valid"
+                          ? "bg-green-50 text-green-700 border border-green-200"
+                          : verificationResult.status === "review"
+                          ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                          : "bg-red-50 text-red-700 border border-red-200"
+                      }`}>
                         {verificationResult.status === "valid" && (
-                          <CheckCircle className="h-4 w-4 mr-2" />
+                          <CheckCircle className="h-5 w-5" />
                         )}
                         {verificationResult.status === "review" && (
-                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          <AlertTriangle className="h-5 w-5" />
                         )}
                         {verificationResult.status === "invalid" && (
-                          <XCircle className="h-4 w-4 mr-2" />
+                          <XCircle className="h-5 w-5" />
                         )}
-                        {verificationResult.status === "valid"
-                          ? "AUTHENTIC"
-                          : verificationResult.status === "review"
-                          ? "NEEDS REVIEW"
-                          : "SUSPICIOUS"}
-                      </Badge>
+                        <span>
+                          {verificationResult.status === "valid"
+                            ? "✓ Authentic"
+                            : verificationResult.status === "review"
+                            ? "⚠ Needs Review"
+                            : "✗ Suspicious"}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Visualization */}
                     {verificationResult.visualizationUrl && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium">Detection Visualization</h4>
+                      <div className="space-y-3 pt-2">
+                        <h4 className="font-semibold text-xs uppercase tracking-wide text-foreground">Detection Map</h4>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <div className="rounded-lg overflow-hidden border cursor-pointer hover:border-primary/50 transition-colors group relative">
+                            <div className="rounded-xl overflow-hidden border border-secondary/20 cursor-pointer hover:border-secondary/60 transition-all duration-300 group relative hover:shadow-lg">
                               <img
                                 src={verificationResult.visualizationUrl}
                                 alt="Detection Results"
-                                className="w-full h-auto group-hover:opacity-90 transition-opacity"
+                                className="w-full h-auto group-hover:opacity-85 transition-opacity"
                               />
-                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                                <div className="bg-white/90 rounded-full p-2">
-                                  <ZoomIn className="h-5 w-5 text-gray-700" />
+                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 backdrop-blur-sm">
+                                <div className="bg-white/95 rounded-full p-3 shadow-lg">
+                                  <ZoomIn className="h-5 w-5 text-foreground" />
                                 </div>
                               </div>
                             </div>
@@ -1060,13 +1124,13 @@ export default function Verify() {
                           <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-auto">
                             <DialogHeader>
                               <DialogTitle className="flex items-center space-x-2">
-                                <Shield className="h-5 w-5" />
-                                <span>Document Verification Analysis</span>
+                                <Shield className="h-5 w-5 text-secondary" />
+                                <span>Detailed Analysis Visualization</span>
                               </DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4">
                               {/* Large Image Display */}
-                              <div className="rounded-lg overflow-hidden border">
+                              <div className="rounded-xl overflow-hidden border border-secondary/20">
                                 <img
                                   src={verificationResult.visualizationUrl}
                                   alt="Detailed Detection Results"
@@ -1076,61 +1140,34 @@ export default function Verify() {
 
                               {/* Legend and Info */}
                               <div className="grid md:grid-cols-2 gap-4">
-                                <div className="space-y-3">
-                                  <h4 className="font-medium">Color Legend</h4>
+                                <div className="space-y-3 bg-secondary/5 rounded-lg p-4 border border-secondary/20">
+                                  <h4 className="font-semibold text-sm">Legend</h4>
                                   <div className="space-y-2">
-                                    <div className="flex items-center space-x-2">
-                                      <div className="w-4 h-4 bg-red-500 rounded border"></div>
-                                      <span className="text-sm">
-                                        Suspicious/Fake Regions
-                                      </span>
+                                    <div className="flex items-center space-x-3">
+                                      <div className="w-5 h-5 bg-red-500 rounded border-2 border-red-600"></div>
+                                      <span className="text-sm">Suspicious/Fake Regions</span>
                                     </div>
-                                    <div className="flex items-center space-x-2">
-                                      <div className="w-4 h-4 bg-green-500 rounded border"></div>
-                                      <span className="text-sm">
-                                        Authentic Regions
-                                      </span>
+                                    <div className="flex items-center space-x-3">
+                                      <div className="w-5 h-5 bg-green-500 rounded border-2 border-green-600"></div>
+                                      <span className="text-sm">Authentic Regions</span>
                                     </div>
                                   </div>
                                 </div>
 
-                                <div className="space-y-3">
-                                  <h4 className="font-medium">
-                                    Detection Summary
-                                  </h4>
-                                  <div className="space-y-2">
-                                    <div className="flex justify-between">
-                                      <span className="text-sm">
-                                        Total Regions:
-                                      </span>
-                                      <span className="font-medium">
-                                        {
-                                          verificationResult.summary
-                                            .totalDetections
-                                        }
-                                      </span>
+                                <div className="space-y-3 bg-secondary/5 rounded-lg p-4 border border-secondary/20">
+                                  <h4 className="font-semibold text-sm">Summary</h4>
+                                  <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-muted-foreground">Total Regions:</span>
+                                      <span className="font-bold">{verificationResult.summary.totalDetections}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-sm text-green-600">
-                                        Authentic:
-                                      </span>
-                                      <span className="font-medium text-green-600">
-                                        {
-                                          verificationResult.summary
-                                            .trueDetections
-                                        }
-                                      </span>
+                                    <div className="flex justify-between items-center text-green-600">
+                                      <span>Authentic:</span>
+                                      <span className="font-bold">{verificationResult.summary.trueDetections}</span>
                                     </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-sm text-red-600">
-                                        Suspicious:
-                                      </span>
-                                      <span className="font-medium text-red-600">
-                                        {
-                                          verificationResult.summary
-                                            .fakeDetections
-                                        }
-                                      </span>
+                                    <div className="flex justify-between items-center text-red-600">
+                                      <span>Suspicious:</span>
+                                      <span className="font-bold">{verificationResult.summary.fakeDetections}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -1138,59 +1175,47 @@ export default function Verify() {
 
                               {/* Detailed Detection List for Modal */}
                               <div className="space-y-3">
-                                <h4 className="font-medium">
-                                  Detailed Analysis
-                                </h4>
-                                <div className="max-h-40 overflow-y-auto space-y-2">
+                                <h4 className="font-semibold text-sm">Region Analysis</h4>
+                                <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
                                   {verificationResult.detections.map(
                                     (detection, index) => (
                                       <div
                                         key={index}
-                                        className={`p-3 rounded border ${
+                                        className={`p-3 rounded-lg border transition-all ${
                                           detection.class_name === "fake"
-                                            ? "bg-red-50 border-red-200"
-                                            : "bg-green-50 border-green-200"
+                                            ? "bg-red-50 border-red-200 hover:border-red-400"
+                                            : "bg-green-50 border-green-200 hover:border-green-400"
                                         }`}
                                       >
                                         <div className="flex items-center justify-between">
                                           <div className="flex items-center space-x-2">
                                             {detection.class_name === "fake" ? (
-                                              <XCircle className="h-4 w-4 text-red-600" />
+                                              <XCircle className="h-4 w-4 text-red-600 flex-shrink-0" />
                                             ) : (
-                                              <CheckCircle className="h-4 w-4 text-green-600" />
+                                              <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
                                             )}
                                             <span
-                                              className={`font-medium ${
+                                              className={`font-semibold text-sm ${
                                                 detection.class_name === "fake"
                                                   ? "text-red-700"
                                                   : "text-green-700"
                                               }`}
                                             >
-                                              Region {index + 1}:{" "}
-                                              {detection.class_name === "fake"
-                                                ? "Suspicious"
-                                                : "Authentic"}
+                                              Region {index + 1}: {detection.class_name === "fake" ? "Suspicious" : "Authentic"}
                                             </span>
                                           </div>
                                           <span
-                                            className={`font-bold ${
+                                            className={`font-bold text-sm ${
                                               detection.class_name === "fake"
                                                 ? "text-red-600"
                                                 : "text-green-600"
                                             }`}
                                           >
-                                            {Math.round(
-                                              detection.confidence * 100
-                                            )}
-                                            %
+                                            {Math.round(detection.confidence * 100)}%
                                           </span>
                                         </div>
-                                        <div className="mt-1 text-xs text-gray-600">
-                                          Coordinates: [
-                                          {detection.bbox
-                                            .map((coord) => Math.round(coord))
-                                            .join(", ")}
-                                          ]
+                                        <div className="mt-2 text-xs text-gray-600 font-mono bg-black/5 px-2 py-1 rounded">
+                                          [{detection.bbox.map((coord) => Math.round(coord)).join(", ")}]
                                         </div>
                                       </div>
                                     )
@@ -1200,16 +1225,18 @@ export default function Verify() {
                             </div>
                           </DialogContent>
                         </Dialog>
-                        <div className="flex items-center justify-center space-x-4 text-xs">
-                          <div className="flex items-center space-x-1">
-                            <div className="w-3 h-3 bg-red-500 rounded"></div>
-                            <span>Suspicious</span>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground bg-secondary/5 rounded-lg p-2">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center space-x-1">
+                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                              <span>Suspicious</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span>Authentic</span>
+                            </div>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <div className="w-3 h-3 bg-green-500 rounded"></div>
-                            <span>Authentic</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-gray-500">
                             <ZoomIn className="w-3 h-3" />
                             <span>Click to enlarge</span>
                           </div>
@@ -1218,121 +1245,73 @@ export default function Verify() {
                     )}
 
                     {/* Detection Summary */}
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Detection Summary</h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="p-2 bg-green-50 border border-green-200 rounded text-center">
-                          <div className="font-bold text-green-600">
+                    <div className="space-y-3 pt-2">
+                      <h4 className="font-semibold text-xs uppercase tracking-wide text-foreground">Detection Summary</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="group p-4 bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200 rounded-xl hover:border-green-400 hover:shadow-md transition-all duration-300 text-center cursor-default">
+                          <div className="font-bold text-3xl text-green-600 group-hover:scale-110 transition-transform">
                             {verificationResult.summary.trueDetections}
                           </div>
-                          <div className="text-xs text-green-700">
-                            Authentic Regions
-                          </div>
+                          <div className="text-xs text-green-700 font-medium mt-1">Authentic</div>
                         </div>
-                        <div className="p-2 bg-red-50 border border-red-200 rounded text-center">
-                          <div className="font-bold text-red-600">
+                        <div className="group p-4 bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200 rounded-xl hover:border-red-400 hover:shadow-md transition-all duration-300 text-center cursor-default">
+                          <div className="font-bold text-3xl text-red-600 group-hover:scale-110 transition-transform">
                             {verificationResult.summary.fakeDetections}
                           </div>
-                          <div className="text-xs text-red-700">
-                            Suspicious Regions
-                          </div>
+                          <div className="text-xs text-red-700 font-medium mt-1">Suspicious</div>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Detailed Detection List */}
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Detection Details</h4>
-                      <div className="max-h-32 overflow-y-auto space-y-1">
-                        {verificationResult.detections.map(
-                          (detection, index) => (
-                            <div
-                              key={index}
-                              className={`flex items-center justify-between p-2 rounded text-sm ${
-                                detection.class_name === "fake"
-                                  ? "bg-red-50 border border-red-200"
-                                  : "bg-green-50 border border-green-200"
-                              }`}
-                            >
-                              <div className="flex items-center space-x-2">
-                                {detection.class_name === "fake" ? (
-                                  <XCircle className="h-4 w-4 text-red-600" />
-                                ) : (
-                                  <CheckCircle className="h-4 w-4 text-green-600" />
-                                )}
-                                <span
-                                  className={
-                                    detection.class_name === "fake"
-                                      ? "text-red-700"
-                                      : "text-green-700"
-                                  }
-                                >
-                                  Region {index + 1}:{" "}
-                                  {detection.class_name === "fake"
-                                    ? "Suspicious"
-                                    : "Authentic"}
-                                </span>
-                              </div>
-                              <span
-                                className={`font-medium ${
-                                  detection.class_name === "fake"
-                                    ? "text-red-600"
-                                    : "text-green-600"
-                                }`}
-                              >
-                                {Math.round(detection.confidence * 100)}%
-                              </span>
-                            </div>
-                          )
-                        )}
                       </div>
                     </div>
 
                     {/* Conclusion */}
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Analysis Result</h4>
+                    <div className="space-y-3 pt-2">
+                      <h4 className="font-semibold text-xs uppercase tracking-wide text-foreground">Assessment</h4>
                       <div
-                        className={`p-3 rounded ${
+                        className={`p-4 rounded-xl border-2 ${
                           verificationResult.status === "valid"
-                            ? "bg-green-50 border border-green-200"
-                            : "bg-red-50 border border-red-200"
+                            ? "bg-gradient-to-r from-green-50 to-green-100/50 border-green-300"
+                            : verificationResult.status === "review"
+                            ? "bg-gradient-to-r from-yellow-50 to-yellow-100/50 border-yellow-300"
+                            : "bg-gradient-to-r from-red-50 to-red-100/50 border-red-300"
                         }`}
                       >
                         <p
-                          className={`text-sm ${
+                          className={`text-sm font-medium leading-relaxed ${
                             verificationResult.status === "valid"
-                              ? "text-green-700"
-                              : "text-red-700"
+                              ? "text-green-800"
+                              : verificationResult.status === "review"
+                              ? "text-yellow-800"
+                              : "text-red-800"
                           }`}
                         >
                           {verificationResult.status === "valid"
-                            ? "✅ This certificate appears to be authentic. All detected regions show genuine characteristics."
+                            ? "✓ This certificate appears to be authentic with genuine characteristics across all detected regions."
                             : verificationResult.status === "review"
-                            ? "⚠️ This certificate requires manual review. Some regions show suspicious patterns."
-                            : "❌ This certificate may be forged. Suspicious regions detected with high confidence."}
+                            ? "⚠ This certificate shows mixed results and requires manual verification by an expert."
+                            : "✗ This certificate appears suspicious with detected forgery indicators. Recommend rejection."}
                         </p>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="w-full">
+                    <div className="w-full pt-2">
                       <Button
-                        variant="outline"
-                        size="sm"
                         onClick={downloadReport}
-                        className="w-full"
+                        className="w-full bg-secondary hover:bg-secondary/90 text-white font-semibold"
                       >
                         <Download className="h-4 w-4 mr-2" />
-                        Download Report
+                        Download Full Report
                       </Button>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      Verification results will appear here
-                    </p>
+                  <div className="text-center py-12">
+                    <div className="relative flex justify-center mb-4">
+                      <div className="absolute inset-0 bg-secondary/10 blur-xl rounded-full opacity-50"></div>
+                      <Shield className="h-14 w-14 text-secondary/40 relative" />
+                    </div>
+                    <p className="font-medium text-foreground">Upload & process first</p>
+                    <p className="text-xs text-muted-foreground mt-1">Results will display here after analysis</p>
                   </div>
                 )}
               </CardContent>

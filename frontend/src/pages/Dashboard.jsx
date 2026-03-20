@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import kscstLogo from "@/assets/image.png";
+import teamPhoto from "@/assets/pic.jpeg";
 import {
   Dialog,
   DialogContent,
@@ -235,58 +237,94 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-card-glass to-primary/5">
       <Navbar />
-      <div className="container py-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="container py-12">
+        <div className="max-w-7xl mx-auto space-y-10">
           {/* Welcome Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-display font-bold">
+              <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">Dashboard</p>
+              <h1 className="text-5xl font-bold text-foreground mb-2">
                 Welcome back, {user?.name || "User"}
               </h1>
-              <p className="text-xl text-muted-foreground">
-                Here's your verification activity overview
+              <p className="text-lg text-muted-foreground">
+                Track and manage your document verification activity
               </p>
             </div>
           </div>
 
+          <Card className="border-success/30 bg-gradient-to-r from-success/10 via-primary/5 to-transparent hover:border-success/50 transition-all">
+            <CardContent className="p-6 md:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-success/20 rounded-lg border border-success/30">
+                    <img
+                      src={teamPhoto}
+                      alt="Team photo"
+                      className="h-12 w-12 object-cover rounded"
+                    />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-xs text-success font-bold uppercase tracking-wide">🇮🇳 Government Approved</p>
+                      <Badge className="bg-success/20 text-success hover:bg-success/30 border-0 h-5">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verified
+                      </Badge>
+                    </div>
+                    <h2 className="text-xl font-bold text-foreground">KSCST Certified System</h2>
+                    <p className="text-xs text-muted-foreground mt-1">Karnataka Government Science & Technology Department</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center space-x-2 text-sm text-success">
+                    <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                    <span className="font-semibold">All systems operational</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Official registration verified</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quick Actions */}
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="border-primary/20 hover-lift bg-gradient-to-br from-primary/5 to-accent/5">
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-hero-gradient flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <FileSearch className="h-8 w-8 text-white" />
+            <Card className="border-primary/20 hover-lift bg-gradient-to-br from-card to-card/80">
+              <CardContent className="p-8 text-center">
+                <div className="w-14 h-14 rounded-xl bg-primary/15 flex items-center justify-center mx-auto mb-5">
+                  <FileSearch className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="font-display font-semibold text-xl mb-2">
+                <h3 className="font-semibold text-lg mb-2 text-foreground">
                   New Verification
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  Upload and verify a new certificate
+                <p className="text-muted-foreground text-sm mb-6">
+                  Upload and analyze a new certificate document
                 </p>
-                <Link to="/verify">
-                  <Button variant="hero" size="lg" className="w-full shadow-md">
+                <Link to="/verify" className="block">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold h-11">
+                    <Upload className="h-4 w-4 mr-2" />
                     Start Verification
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
-            <Card className="border-primary/20 hover-lift bg-gradient-to-br from-accent/5 to-secondary/5">
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-accent to-accent-light flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <History className="h-8 w-8 text-white" />
+            <Card className="border-accent/20 hover-lift bg-gradient-to-br from-card to-card/80">
+              <CardContent className="p-8 text-center">
+                <div className="w-14 h-14 rounded-xl bg-accent/15 flex items-center justify-center mx-auto mb-5">
+                  <History className="h-7 w-7 text-accent" />
                 </div>
-                <h3 className="font-display font-semibold text-xl mb-2">
+                <h3 className="font-semibold text-lg mb-2 text-foreground">
                   View History
                 </h3>
-                <p className="text-muted-foreground mb-4">
-                  Browse your verification records
+                <p className="text-muted-foreground text-sm mb-6">
+                  Review your verification records and results
                 </p>
                 <Button
                   variant="outline"
-                  size="lg"
-                  className="w-full shadow-md border-accent/20 hover:bg-accent/10"
+                  className="w-full border-accent/30 hover:bg-accent/10 font-semibold h-11"
                   onClick={() => setShowAllHistoryModal(true)}
                 >
+                  <History className="h-4 w-4 mr-2" />
                   Browse History
                 </Button>
               </CardContent>
@@ -294,22 +332,52 @@ export default function Dashboard() {
           </div>
 
           {/* Statistics Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+          <div>
+            <h2 className="text-xl font-bold text-foreground mb-4">Key Metrics</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {stats.map((stat, index) => {
+                const IconComponent = stat.icon;
+                return (
+                  <Card key={index} className="border-primary/20 hover:border-primary/50 transition-all hover:shadow-md">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="p-2 bg-primary/15 rounded-lg">
+                          <IconComponent className="h-5 w-5 text-primary" />
+                        </div>
+                        <span className={`text-xs font-semibold ${stat.change?.startsWith('+') ? 'text-success' : 'text-accent'}`}>
+                          {stat.change}
+                        </span>
+                      </div>
+                      <p className="text-muted-foreground text-sm mb-2">{stat.label}</p>
+                      <p className="text-3xl font-bold text-foreground">
+                        {stat.value}{stat.suffix || ''}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
 
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Recent Activity */}
             <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <History className="h-5 w-5" />
-                  <span>Recent Verifications</span>
-                </CardTitle>
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center space-x-3 text-lg">
+                    <div className="p-2 bg-primary/15 rounded-lg">
+                      <History className="h-5 w-5 text-primary" />
+                    </div>
+                    <span>Recent Verifications</span>
+                  </CardTitle>
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wide">Last 5</span>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-2">
                 {isLoadingVerifications ? (
                   <div className="flex items-center justify-center p-8">
                     <div className="text-sm text-muted-foreground">
-                      Loading recent verifications...
+                      Loading verifications...
                     </div>
                   </div>
                 ) : recentVerifications.length > 0 ? (
@@ -317,26 +385,38 @@ export default function Dashboard() {
                     .slice()
                     .reverse()
                     .slice(0, 5)
-                    .map((verification) => (
+                    .map((verification, idx) => (
                       <div
                         key={verification._id}
-                        className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                        className="flex items-start justify-between p-4 bg-gradient-to-r from-primary/5 to-transparent rounded-lg border border-primary/10 hover:border-primary/30 transition-all group"
                       >
-                        <div className="flex-1">
-                          <p className="font-medium">{verification.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {verification.institution}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(verification.date)}
-                          </p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-semibold text-primary">{idx + 1}</span>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-sm text-foreground truncate">{verification.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{verification.institution}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+                          <div className="text-right">
+                            <Badge className="bg-success/20 text-success hover:bg-success/30 border-0">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                            <p className="text-xs text-muted-foreground mt-1">{formatDate(verification.date)}</p>
+                          </div>
                         </div>
                       </div>
                     ))
                 ) : (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="text-sm text-muted-foreground">
-                      No recent verifications found.
+                  <div className="flex items-center justify-center p-12">
+                    <div className="text-center">
+                      <History className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">No verifications yet</p>
                     </div>
                   </div>
                 )}
@@ -414,49 +494,58 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Performance Metrics */}
+            {/* Statistics Chart */}
             <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
-                  <span>Performance Overview</span>
-                </CardTitle>
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center space-x-3 text-lg">
+                    <div className="p-2 bg-primary/15 rounded-lg">
+                      <BarChart3 className="h-5 w-5 text-primary" />
+                    </div>
+                    <span>Verification Trends</span>
+                  </CardTitle>
+                  <span className="text-xs font-semibold text-muted-foreground">Last 7 days</span>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">
-                      Processing Speed
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      Excellent
-                    </span>
-                  </div>
-                  <Progress value={95} className="h-2" />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Accuracy Rate</span>
-                    <span className="text-sm text-muted-foreground">97.5%</span>
-                  </div>
-                  <Progress value={97.5} className="h-2" />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">
-                      System Reliability
-                    </span>
-                    <span className="text-sm text-muted-foreground">99.9%</span>
-                  </div>
-                  <Progress value={99.9} className="h-2" />
-                </div>
-
-                <div className="pt-4 border-t">
-                  <div className="flex items-center space-x-2 text-sm text-success">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>All systems operational</span>
+              <CardContent>
+                <div className="space-y-6">
+                  {[
+                    { day: "Mon", value: 18, max: 24 },
+                    { day: "Tue", value: 22, max: 24 },
+                    { day: "Wed", value: 19, max: 24 },
+                    { day: "Thu", value: 24, max: 24 },
+                    { day: "Fri", value: 20, max: 24 },
+                    { day: "Sat", value: 15, max: 24 },
+                    { day: "Sun", value: 10, max: 24 },
+                  ].map((item, idx) => (
+                    <div key={idx} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-muted-foreground">{item.day}</span>
+                        <span className="text-sm font-bold text-foreground">{item.value}</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-primary to-accent h-full rounded-full transition-all"
+                          style={{ width: `${(item.value / item.max) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="pt-4 border-t">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Total</p>
+                        <p className="text-xl font-bold text-foreground">128</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Avg/Day</p>
+                        <p className="text-xl font-bold text-foreground">18</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Success</p>
+                        <p className="text-xl font-bold text-success">94%</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -465,41 +554,58 @@ export default function Dashboard() {
 
           {/* System Status */}
           <Card className="border-primary/20 bg-gradient-to-br from-success/5 to-primary/5">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Shield className="h-5 w-5" />
-                <span>System Health</span>
-              </CardTitle>
+            <CardHeader className="pb-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center space-x-3 text-lg">
+                  <div className="p-2 bg-success/20 rounded-lg">
+                    <Shield className="h-5 w-5 text-success" />
+                  </div>
+                  <span>System Status</span>
+                </CardTitle>
+                <div className="flex items-center space-x-2 text-sm text-success">
+                  <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+                  <span className="font-semibold">Healthy</span>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-3 gap-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-success to-success/80 flex items-center justify-center shadow-lg">
-                    <Zap className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium">OCR Engine</p>
-                    <p className="text-sm text-success">Operational</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
-                    <Building2 className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Registry Access</p>
-                    <p className="text-sm text-success">Connected</p>
+                <div className="p-4 bg-card rounded-lg border border-success/20 hover:border-success/50 transition-all">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-lg bg-success/20 flex items-center justify-center flex-shrink-0">
+                      <Zap className="h-6 w-6 text-success" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm">OCR Engine</p>
+                      <p className="text-xs text-success font-medium mt-1">● Operational</p>
+                      <p className="text-xs text-muted-foreground mt-1">Response: 120ms</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shadow-lg">
-                    <Users className="h-6 w-6 text-white" />
+                <div className="p-4 bg-card rounded-lg border border-primary/20 hover:border-primary/50 transition-all">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Building2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm">Registry Access</p>
+                      <p className="text-xs text-success font-medium mt-1">● Connected</p>
+                      <p className="text-xs text-muted-foreground mt-1">99.9% Uptime</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">API Services</p>
-                    <p className="text-sm text-success">Active</p>
+                </div>
+
+                <div className="p-4 bg-card rounded-lg border border-accent/20 hover:border-accent/50 transition-all">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                      <Users className="h-6 w-6 text-accent" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm">API Services</p>
+                      <p className="text-xs text-success font-medium mt-1">● Active</p>
+                      <p className="text-xs text-muted-foreground mt-1">3/3 Services Online</p>
+                    </div>
                   </div>
                 </div>
               </div>

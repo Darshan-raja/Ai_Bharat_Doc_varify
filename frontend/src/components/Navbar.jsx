@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import kscstLogo from "@/assets/image.png";
 import {
   Shield,
   Menu,
@@ -114,9 +115,11 @@ export function Navbar() {
           to="/"
           className="flex items-center space-x-3 hover:opacity-90 transition-opacity"
         >
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-hero-gradient">
-            <Shield className="h-6 w-6 text-white" />
-          </div>
+          <img
+            src={kscstLogo}
+            alt="KSCST logo"
+            className="h-10 w-10 rounded-lg object-cover"
+          />
           <div className="hidden sm:block">
             <h1 className="font-display text-xl font-bold text-foreground">
             Doc Verfiy
