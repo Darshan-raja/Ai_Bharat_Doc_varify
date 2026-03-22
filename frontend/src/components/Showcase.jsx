@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+
 import { 
   Smartphone, 
   Globe, 
@@ -8,8 +10,8 @@ import {
   ArrowRight,
   CheckCircle
 } from "lucide-react";
-import verificationUI from "@/assets/verification-ui.jpg";
 import securityFeatures from "@/assets/security-features.png";
+import verificationUI from "../assets/verification-ui.jpg";
 
 const integrations = [
   { name: "REST API", desc: "Complete programmatic access" },

@@ -41,7 +41,7 @@ const stats = [
   {
     icon: FileCheck,
     label: "Documents Verified",
-    value: 125000,
+    value: 12000,
     suffix: "+",
     change: "+12%",
     trend: "up"
@@ -49,7 +49,7 @@ const stats = [
   {
     icon: Users,
     label: "Active Verifiers",
-    value: 2500,
+    value: 1500,
     suffix: "+",
     change: "+8%",
     trend: "up"
@@ -57,14 +57,14 @@ const stats = [
   {
     icon: Building2,
     label: "Registered Institutions",
-    value: 180,
+    value: 100,
     change: "+5 this month",
     trend: "up"
   },
   {
     icon: AlertTriangle,
     label: "Fraud Detection Rate",
-    value: 98,
+    value: 89.6,
     suffix: "%",
     change: "Industry leading",
     trend: "up"
@@ -72,7 +72,7 @@ const stats = [
   {
     icon: Clock,
     label: "Avg. Verification Time",
-    value: 28,
+    value: 18,
     suffix: "s",
     change: "-15% faster",
     trend: "up"

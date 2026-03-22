@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import kscstLogo from "@/assets/image.png";
+import kscstLogo from "@/assets/grad.png";
 import {
   Shield,
   Menu,
