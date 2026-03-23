@@ -303,7 +303,7 @@ from dotenv import load_dotenv
 
 import google.generativeai as genai
 
-from id_ocr import extract_text, detect_pan, detect_aadhaar, detect_passport, detect_cheque
+from id_ocr import extract_text_and_confidence, detect_pan, detect_aadhaar, detect_passport, detect_cheque
 from pan_tampering import detect_pan_tampering
 
 # ================= ENV =================
@@ -321,6 +321,12 @@ api_usage = {
     "date": str(date.today()),
     "count": 0
 }
+
+AUTH_SCORE_MAX = 0.3
+SUSPICIOUS_SCORE_MAX = 0.7
+OCR_CONFIDENCE_MIN = 0.25
+OCR_CONFIDENCE_HARD_FAIL = 0.10
+RATE_LIMIT_RETRY_SECONDS = 20
 
 
 def get_quota_status():
@@ -346,6 +352,190 @@ def increment_usage():
         api_usage["date"] = str(date.today())
         api_usage["count"] = 0
     api_usage["count"] += 1
+
+
+def is_rate_limit_error(message: str) -> bool:
+    msg = _safe_str(message).lower()
+    return any(token in msg for token in ["quota", "rate limit", "429", "resource exhausted"])
+
+
+def build_rate_limit_response(message: str = "API limit exceeded"):
+    return {
+        "error_type": "RATE_LIMIT",
+        "error": "RATE_LIMIT",
+        "final_status": "PENDING",
+        "message": message,
+        "retry_after_seconds": RATE_LIMIT_RETRY_SECONDS,
+    }
+
+
+def _safe_str(value):
+    if value is None:
+        return ""
+    return str(value).strip()
+
+
+def _digits_only(value):
+    return re.sub(r"\D", "", _safe_str(value))
+
+
+def normalize_document_type(value):
+    doc_type = _safe_str(value).upper().replace("-", " ").replace("_", " ")
+    doc_type = " ".join(doc_type.split())
+
+    alias_map = {
+        "AADHAR": "AADHAAR",
+        "ADHAAR": "AADHAAR",
+        "AADHAR CARD": "AADHAAR",
+        "AADHAAR CARD": "AADHAAR",
+        "PAN CARD": "PAN",
+        "PASSPORT CARD": "PASSPORT",
+        "MARKSHEET": "MARKSHEET",
+        "MARK SHEET": "MARKSHEET",
+        "MARKCARD": "MARKSHEET",
+        "MARK CARD": "MARKSHEET",
+        "MARKSCARD": "MARKSHEET",
+        "MARKS CARD": "MARKSHEET",
+        "MARKSHEET CERTIFICATE": "MARKSHEET",
+        "EDUCATIONAL CERTIFICATE": "MARKSHEET",
+    }
+
+    if doc_type in alias_map:
+        return alias_map[doc_type]
+
+    return doc_type
+
+
+def _contains_any(text, keywords):
+    text_u = _safe_str(text).upper()
+    return any(keyword in text_u for keyword in keywords)
+
+
+def validate_document_fields(data, source_text=""):
+    """Return validation state: VALID, PARTIAL, or INVALID."""
+    doc_type = normalize_document_type(data.get("document_type"))
+
+    if doc_type == "PAN":
+        pan_number = _safe_str(data.get("PAN Number")).upper()
+        name = _safe_str(data.get("Name"))
+        if not pan_number:
+            return "INVALID", "PAN number missing"
+        if not re.match(r"^[A-Z]{5}[0-9]{4}[A-Z]$", pan_number):
+            return "INVALID", "Invalid PAN format"
+        if not name:
+            return "PARTIAL", "PAN number valid but name missing"
+        return "VALID", "Valid PAN data"
+
+    if doc_type == "AADHAAR":
+        aadhaar_number = _digits_only(data.get("Aadhaar Number"))
+        name = _safe_str(data.get("Name"))
+        dob = _safe_str(data.get("Date of Birth"))
+
+        joined_signals = " ".join([
+            _safe_str(source_text),
+            _safe_str(data.get("Name")),
+            _safe_str(data.get("document_type")),
+            _safe_str(data.get("Gender")),
+            _safe_str(data.get("message")),
+        ])
+
+        aadhaar_anchors = [
+            "AADHAAR", "AADHAR", "UIDAI", "GOVERNMENT OF INDIA", "GOVT OF INDIA", "INDIA"
+        ]
+        foreign_markers = [
+            "REPUBLIC OF", "KENYA", "NATIONAL ID", "IDENTITY CARD", "PASSPORT NO"
+        ]
+
+        if not aadhaar_number:
+            return "INVALID", "Aadhaar number missing"
+        if not re.match(r"^[0-9]{12}$", aadhaar_number):
+            return "INVALID", "Invalid Aadhaar format"
+        if _contains_any(joined_signals, foreign_markers) and not _contains_any(joined_signals, aadhaar_anchors):
+            return "INVALID", "Non-Aadhaar ID detected"
+        if not _contains_any(joined_signals, aadhaar_anchors):
+            return "PARTIAL", "Aadhaar number found but card anchors are weak"
+        if not name or not dob:
+            return "PARTIAL", "Aadhaar number valid but profile fields are incomplete"
+        return "VALID", "Valid Aadhaar data"
+
+    if doc_type == "PASSPORT":
+        passport_number = _safe_str(data.get("Passport Number")).upper()
+        name = _safe_str(data.get("Name"))
+        dob = _safe_str(data.get("Date of Birth"))
+        if not passport_number:
+            return "INVALID", "Passport number missing"
+        if not re.match(r"^[A-Z][0-9]{7}$", passport_number):
+            return "INVALID", "Invalid passport format"
+        if not name or not dob:
+            return "PARTIAL", "Passport number valid but profile fields are incomplete"
+        return "VALID", "Valid passport data"
+
+    if doc_type == "MARKSHEET":
+        key_fields = ["Name", "Roll Number", "Institution", "Course", "Year"]
+        present = [field for field in key_fields if _safe_str(data.get(field))]
+        if len(present) >= 3:
+            return "VALID", "Marksheet fields look consistent"
+        if len(present) >= 1:
+            return "PARTIAL", "Marksheet partially extracted"
+        return "INVALID", "Marksheet data could not be extracted"
+
+    return "INVALID", "Unsupported document type"
+
+
+def evaluate_final_status(data, tamper_info, ocr_confidence, source_text=""):
+    data["document_type"] = normalize_document_type(data.get("document_type"))
+
+    tampering_score = float(tamper_info.get("tampering_score", 1.0))
+    tampering_score = max(0.0, min(1.0, tampering_score))
+
+    if ocr_confidence < OCR_CONFIDENCE_HARD_FAIL:
+        return {
+            "final_status": "SUSPICIOUS",
+            "reason": "Low OCR confidence",
+            "model_score": tampering_score,
+            "message": "Document image is unreadable. Please upload a clearer image."
+        }
+
+    validation_state, reason = validate_document_fields(data, source_text)
+
+    if validation_state == "INVALID":
+        return {
+            "final_status": "FAKE",
+            "reason": reason,
+            "model_score": 0.0,
+            "message": "Document rejected due to invalid or incomplete data."
+        }
+
+    if ocr_confidence < OCR_CONFIDENCE_MIN or validation_state == "PARTIAL":
+        return {
+            "final_status": "SUSPICIOUS",
+            "reason": "Low OCR confidence or partial extraction",
+            "model_score": tampering_score,
+            "message": "Document detected, but quality/extraction is incomplete. Please re-upload a clearer image."
+        }
+
+    if tampering_score < AUTH_SCORE_MAX:
+        return {
+            "final_status": "AUTHENTIC",
+            "reason": "Model score and rule checks passed",
+            "model_score": tampering_score,
+            "message": f"Authentic {data.get('document_type')} detected."
+        }
+
+    if tampering_score < SUSPICIOUS_SCORE_MAX:
+        return {
+            "final_status": "SUSPICIOUS",
+            "reason": "Tampering score is in suspicious range",
+            "model_score": tampering_score,
+            "message": "Document appears suspicious and needs manual review."
+        }
+
+    return {
+        "final_status": "FAKE",
+        "reason": "Tampering score in fake range",
+        "model_score": tampering_score,
+        "message": "Document rejected because tampering indicators are high."
+    }
 
 
 # ================= APP =================
@@ -423,25 +613,40 @@ Return STRICT JSON only. If a field is missing, set it to null.
 """
 
     model = genai.GenerativeModel("gemini-2.5-flash")
-    response = model.generate_content(
-        contents=[
-            {
-                "role": "user",
-                "parts": [
-                    prompt,
-                    {"mime_type": "image/png", "data": image_data}
-                ]
-            }
-        ]
-    )
+
+    try:
+        response = model.generate_content(
+            contents=[
+                {
+                    "role": "user",
+                    "parts": [
+                        prompt,
+                        {"mime_type": "image/png", "data": image_data}
+                    ]
+                }
+            ]
+        )
+    except Exception as e:
+        error_message = str(e)
+        print(f"Gemini API Error: {error_message}")
+        if is_rate_limit_error(error_message):
+            return build_rate_limit_response("API limit exceeded")
+        return {
+            "error": "OCR_API_ERROR",
+            "final_status": "PENDING",
+            "message": f"OCR API error: {error_message}",
+        }
 
     try:
         return json.loads(response.text.strip())
-    except json.JSONDecodeError:
+    except Exception:
         match = re.search(r"\{.*\}", response.text, re.DOTALL)
         if match:
-            return json.loads(match.group())
-        return {"error": "Please enter an educational certificate."}
+            try:
+                return json.loads(match.group())
+            except:
+                pass
+        return {"error": "Please enter an educational certificate. OCR failed to parse structure."}
 
 # ================= API =================
 
@@ -458,13 +663,13 @@ async def extract_document(file: UploadFile = File(...)):
     # Check quota before processing
     quota = get_quota_status()
     if quota["is_exhausted"]:
+        safe_response = build_rate_limit_response(
+            f"Daily limit of {DAILY_LIMIT} requests reached. Please wait and retry."
+        )
+        safe_response["quota"] = quota
         return JSONResponse(
             status_code=429,
-            content={
-                "error": "API limit exhausted",
-                "message": f"Daily limit of {DAILY_LIMIT} requests reached. Please try again tomorrow.",
-                "quota": quota
-            }
+            content=safe_response
         )
 
     if not file.content_type.startswith("image/"):
@@ -479,7 +684,7 @@ async def extract_document(file: UploadFile = File(...)):
         f.write(image_bytes)
 
     # ================= ID OCR FIRST (PAN / AADHAAR / PASSPORT / CHEQUE) =================
-    ocr_text = extract_text(image_path)
+    ocr_text, ocr_confidence = extract_text_and_confidence(image_path)
 
     print("====================================")
     print("OCR TEXT RAW:")
@@ -491,16 +696,18 @@ async def extract_document(file: UploadFile = File(...)):
     if pan:
         # For PAN, also run tampering detection
         tamper_info = detect_pan_tampering(image_path)
-        return JSONResponse(content={
+        response_data = {
             "document_type": "PAN",
             "PAN Number": pan["number"],
             "Name": pan["name"],
             "Date of Birth": None,
+            "ocr_confidence": round(ocr_confidence, 3),
             "tampering_result": tamper_info.get("tampering_result"),
             "tampering_score": tamper_info.get("tampering_score"),
-            "final_status": "AUTHENTIC" if tamper_info.get("tampering_result") == "AUTHENTIC" else "SUSPICIOUS",
-            "message": "PAN card detected and verified"
-        })
+        }
+        response_data.update(evaluate_final_status(
+            response_data, tamper_info, ocr_confidence, ocr_text))
+        return JSONResponse(content=response_data)
 
     # For Aadhaar, Passport, and other documents - use Gemini for better accuracy
     # (Local OCR gives incomplete name and sometimes wrong numbers)
@@ -520,22 +727,21 @@ async def extract_document(file: UploadFile = File(...)):
 
     # ================= GEMINI FOR MARKSHEET =================
     data = extract_with_gemini(image_bytes)
-    increment_usage()  # Track API usage
 
     if "error" in data:
+        if data.get("error") == "RATE_LIMIT" or data.get("error_type") == "RATE_LIMIT":
+            return JSONResponse(status_code=429, content=data)
         return JSONResponse(content=data)
+
+    increment_usage()  # Track only successful Gemini calls
 
     # ================= TAMPERING DETECTION =================
     # We run the image quality / tampering heuristics for ALL documents
     tamper_info = detect_pan_tampering(image_path)
     data.update(tamper_info)
 
-    # Decide final status based on tampering score
-    if tamper_info.get("tampering_result") == "SUSPICIOUS":
-        data["final_status"] = "SUSPICIOUS"
-        data["message"] = f"Document quality suspicious or tampered. Detected as {data.get('document_type')}."
-    else:
-        data["final_status"] = "AUTHENTIC"
-        data["message"] = f"Authentic {data.get('document_type')} detected."
+    data["ocr_confidence"] = round(ocr_confidence, 3)
+    data.update(evaluate_final_status(
+        data, tamper_info, ocr_confidence, ocr_text))
 
     return JSONResponse(content=data)

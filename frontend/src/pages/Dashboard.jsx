@@ -203,7 +203,7 @@ export default function Dashboard() {
     formData.append("file", uploadedDoc);
     try {
       const response = await fetch(
-        "https://hackodisha-forge-detection-api-1.onrender.com/predict",
+        "/api/forge/predict",
         {
           method: "POST",
           body: formData,

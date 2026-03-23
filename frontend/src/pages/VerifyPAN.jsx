@@ -9,6 +9,8 @@ export default function VerifyPAN() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const handleVerify = async () => {
     if (!file) return;
 
@@ -16,14 +18,36 @@ export default function VerifyPAN() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("http://127.0.0.1:8000/extract", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      let retries = 1;
+      let data = null;
 
-    const data = await res.json();
-    setResult(data);
-    setLoading(false);
+      while (retries >= 0) {
+        const res = await fetch("http://127.0.0.1:8000/ocr/extract", {
+          method: "POST",
+          body: formData,
+        });
+
+        data = await res.json();
+        const isRateLimit =
+          res.status === 429 ||
+          data?.error === "RATE_LIMIT" ||
+          data?.error_type === "RATE_LIMIT";
+
+        if (isRateLimit && retries > 0) {
+          window.alert("API limit exceeded. Please wait and retry.");
+          await sleep((data?.retry_after_seconds || 20) * 1000);
+          retries -= 1;
+          continue;
+        }
+
+        break;
+      }
+
+      setResult(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

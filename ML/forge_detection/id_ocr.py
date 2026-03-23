@@ -56,6 +56,33 @@ def extract_text(image_path):
         return ""
 
 
+def extract_text_and_confidence(image_path):
+    """Extract text and average OCR confidence in [0, 1]."""
+    try:
+        preprocessed = preprocess_image(image_path)
+
+        if preprocessed is not None:
+            results1 = reader.readtext(preprocessed, detail=1)
+            text1 = " ".join([r[1] for r in results1]).upper()
+
+            results2 = reader.readtext(image_path, detail=1)
+            text2 = " ".join([r[1] for r in results2]).upper()
+
+            chosen = results1 if len(text1) >= len(text2) else results2
+            chosen_text = text1 if len(text1) >= len(text2) else text2
+        else:
+            chosen = reader.readtext(image_path, detail=1)
+            chosen_text = " ".join([r[1] for r in chosen]).upper()
+
+        confidences = [float(r[2])
+                       for r in chosen if len(r) >= 3 and r[2] is not None]
+        avg_conf = sum(confidences) / len(confidences) if confidences else 0.0
+        return chosen_text, float(avg_conf)
+    except Exception as e:
+        print(f"OCR confidence error: {e}")
+        return "", 0.0
+
+
 def extract_name_from_text(text):
     """
     Try to extract name from OCR text.
