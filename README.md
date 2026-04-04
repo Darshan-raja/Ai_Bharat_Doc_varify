@@ -3,6 +3,8 @@
 A comprehensive document verification system using AI/ML techniques to detect forged documents and extract information via OCR.
 
 ## 🎯 Project Overview
+OUT PUT
+
 
 This project combines:
 - **Frontend**: React + TypeScript + Vite with Shadcn UI components
@@ -230,8 +232,12 @@ Create a `Dockerfile` for containerized deployment
 ISC License
 
 ## 👥 Contributors
+  FE(Frontend),  BE(Backend), R&D( Research and development) 
 
-- Darshan Raja (@Darshan-raja)
+- Darshan DG (Team leader, AIML,BE,R&D)
+- Vinayaka B (FE,R&D)
+- Prajwal K (BE, R&D)
+- Divya (UIUX, R&D)
 
 ## 📞 Support
 
