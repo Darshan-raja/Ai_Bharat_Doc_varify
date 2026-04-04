@@ -234,7 +234,7 @@ FE frontebd BE backend ML
 - Darshan Raja (BE, AIML )( Team Leader)
 - vinyak (FE) 
 - Prajwal(BE) 
-- Divya (UIUX) (@Darshan-raja)
+- Divya (UIUX) 
 
 ## 📞 Support
 
