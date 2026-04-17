@@ -246,7 +246,8 @@ Create a `Dockerfile` for containerized deployment
 ## 📄 License
 
 ISC License
-<img width="1236" height="1137" alt="K_gov" src="https://github.com/user-attachments/assets/5af18a37-6189-41c6-a8f0-3df9cb032c70" />
+<img width="1236" height="837" alt="K_gov" src="https://github.com/user-attachments/assets/8fc3685e-753c-451d-bd71-6f66b5d0f9b7" />
+
 
 
 ## 👥 Contributors
