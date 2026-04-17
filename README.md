@@ -1,4 +1,22 @@
-# AI Bharat Document Verification System
+ ##  **#BHARATVERIFY_AI_DRIVEN.IDENTITY_PROOF_CHECKER**
+<img width="1915" height="996" alt="image" src="https://github.com/user-attachments/assets/3a369fa7-a346-4c8b-b0db-15dd57d35aa5" />
+
+<img width="1919" height="986" alt="image" src="https://github.com/user-attachments/assets/38f0cd7a-813d-424f-a454-a72e9e03cd75" />
+
+https://github.com/user-attachments/assets/e1cf3309-0339-4dd6-8ac0-82a7bfd3d45d
+
+https://github.com/user-attachments/assets/792ec698-e7d2-451b-9875-b8261f45a96a
+
+https://github.com/user-attachments/assets/87388d8a-2079-4fd7-b90e-e09fb90727bb
+
+
+
+
+
+
+
+
+
 
 A comprehensive document verification system using AI/ML techniques to detect forged documents and extract information via OCR.
 
