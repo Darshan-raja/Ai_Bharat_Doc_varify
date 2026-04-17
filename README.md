@@ -1,10 +1,26 @@
-# AI Bharat Document Verification System
+ ##  **#BHARATVERIFY_AI_DRIVEN.IDENTITY_PROOF_CHECKER**
+<img width="1915" height="996" alt="image" src="https://github.com/user-attachments/assets/3a369fa7-a346-4c8b-b0db-15dd57d35aa5" />
+
+<img width="1919" height="986" alt="image" src="https://github.com/user-attachments/assets/38f0cd7a-813d-424f-a454-a72e9e03cd75" />
+
+https://github.com/user-attachments/assets/e1cf3309-0339-4dd6-8ac0-82a7bfd3d45d
+
+https://github.com/user-attachments/assets/792ec698-e7d2-451b-9875-b8261f45a96a
+
+https://github.com/user-attachments/assets/87388d8a-2079-4fd7-b90e-e09fb90727bb
+
+
+
+
+
+
+
+
+
 
 A comprehensive document verification system using AI/ML techniques to detect forged documents and extract information via OCR.
 
 ## 🎯 Project Overview
-OUT PUT
-
 
 This project combines:
 - **Frontend**: React + TypeScript + Vite with Shadcn UI components
@@ -230,21 +246,21 @@ Create a `Dockerfile` for containerized deployment
 ## 📄 License
 
 ISC License
+<img width="1532" height="1031" alt="Ks_gov" src="https://github.com/user-attachments/assets/d6186102-1e54-4578-a37f-3717c7d84164" />
+
+<img width="1236" height="837" alt="K_gov" src="https://github.com/user-attachments/assets/8fc3685e-753c-451d-bd71-6f66b5d0f9b7" />
+
+
 
 ## 👥 Contributors
-  FE(Frontend),  BE(Backend), R&D( Research and development) 
-
-- Darshan DG (Team leader, AIML,BE,R&D)
-- Vinayaka B (FE,R&D)
-- Prajwal K (BE, R&D)
-- Divya (UIUX, R&D)
+FE frontebd BE backend ML
+- Darshan Raja (BE, AIML )( Team Leader)
+- vinyak (FE) 
+- Prajwal(BE) 
+- Divya (UIUX) 
 
 ## 📞 Support
 
 For issues, questions, or suggestions, please open an issue on GitHub.
 
 ---
-
-**Last Updated:** December 23, 2025
-
-**Note:** This project is still in development. See [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) for deployment preparation steps.
