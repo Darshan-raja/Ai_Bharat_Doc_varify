@@ -27,7 +27,7 @@ A comprehensive **document verification** system that uses **AI/ML** to help det
 ---
 
 ## Tech Stack
-- **Frontend:** React + TypeScript + Vite (Shadcn UI)
+- **Frontend:** React + Javascript + Vite (Shadcn UI)
 - **Backend:** Node.js + Express + MongoDB
 - **ML Services:**
   - Forgery detection (deep learning)
