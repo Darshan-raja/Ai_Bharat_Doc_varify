@@ -1,0 +1,224 @@
+Updated todo list
+
+## 📚 **COMMANDS EXPLAINED - LEARNING GUIDE**
+
+---
+
+## **1️⃣ CREATE FOLDER**
+```powershell
+mkdir devops
+```
+- **What:** Creates a new directory/folder
+- **Breakdown:** `mkdir` = "make directory"
+- **Result:** New folder named `devops` created
+
+---
+
+## **2️⃣ MOVE FILES**
+```powershell
+Move-Item -Path .\Dockerfile.* -Destination .\devops\
+```
+- **What:** Moves all Dockerfile files to devops folder
+- **Breakdown:**
+  - `Move-Item` = move command
+  - `-Path .\Dockerfile.*` = find all files starting with "Dockerfile." in current folder (`.` = current, `*` = wildcard)
+  - `-Destination .\devops\` = move to devops folder
+- **Result:** All 4 Dockerfiles moved to `devops/`
+
+---
+
+## **3️⃣ LIST FILES**
+```powershell
+Get-ChildItem .\devops\
+```
+- **What:** Shows all files in a folder
+- **Breakdown:**
+  - `Get-ChildItem` = list files/folders
+  - `.\devops\` = in the devops folder
+- **Result:** Shows all 4 Dockerfile files in devops/
+
+---
+
+## **4️⃣ FORMATTED LIST**
+```powershell
+Get-ChildItem -Path "c:\..." | Format-Table Name, LastWriteTime
+```
+- **What:** Lists files in a formatted table
+- **Breakdown:**
+  - `Get-ChildItem` = list files
+  - `-Path "path"` = specific folder path
+  - `|` = pipe (send output to next command)
+  - `Format-Table Name, LastWriteTime` = show in table format with Name & date columns
+- **Result:** Nice table showing Name and Last Modified date
+
+---
+
+## **5️⃣ FIND & REPLACE (TEXT)**
+```powershell
+(Get-Content docker-compose.yml) -replace 'old-text', 'new-text' | Set-Content docker-compose.yml
+```
+- **What:** Find text in file and replace it
+- **Breakdown:**
+  - `Get-Content docker-compose.yml` = read file content
+  - `-replace 'old', 'new'` = find "old" and replace with "new"
+  - `|` = pipe output
+  - `Set-Content docker-compose.yml` = write back to file
+- **Result:** File updated with new text
+
+**Example we used:**
+```powershell
+(Get-Content docker-compose.yml) -replace 'dockerfile: Dockerfile\.backend', 'dockerfile: ./devops/Dockerfile.backend' | Set-Content docker-compose.yml
+```
+- Finds: `dockerfile: Dockerfile.backend`
+- Replaces with: `dockerfile: ./devops/Dockerfile.backend`
+
+---
+
+## **6️⃣ SEARCH TEXT IN FILE**
+```powershell
+Select-String "dockerfile:" docker-compose.yml
+```
+- **What:** Find all lines with specific text
+- **Breakdown:**
+  - `Select-String` = search command
+  - `"dockerfile:"` = search for this text
+  - `docker-compose.yml` = in this file
+- **Result:** Shows all lines containing "dockerfile:" with line numbers
+
+---
+
+## **7️⃣ COPY FILE**
+```powershell
+Copy-Item "source-path" "destination-path" -Force
+```
+- **What:** Copy a file from one place to another
+- **Breakdown:**
+  - `Copy-Item` = copy command
+  - `"source-path"` = where the file is now
+  - `"destination-path"` = where to copy it
+  - `-Force` = overwrite if already exists
+- **Result:** File copied to new location
+
+**Example:**
+```powershell
+Copy-Item "d:\Downloads\files\ci-cd.yml" "c:\...\ci-cd.yml" -Force
+```
+
+---
+
+## **8️⃣ CHANGE DIRECTORY**
+```powershell
+cd "c:\Users\...\project"
+```
+- **What:** Navigate to a folder
+- **Breakdown:**
+  - `cd` = change directory
+  - Path = folder to go to
+- **Result:** Command prompt now in that folder
+
+---
+
+## **9️⃣ WRITE TEXT OUTPUT**
+```powershell
+Write-Host "✅ Updated: $file"
+```
+- **What:** Print text to screen
+- **Breakdown:**
+  - `Write-Host` = print command
+  - `"text"` = what to print
+  - `$file` = variable (shows file path)
+- **Result:** Message printed to console
+
+---
+
+## **KEY SYMBOLS EXPLAINED**
+
+| Symbol | Meaning | Example |
+|--------|---------|---------|
+| `.` | Current folder | `.\devops\` = devops folder here |
+| `..` | Parent folder | `cd ..` = go up one level |
+| `*` | Wildcard (any) | `Dockerfile.*` = all files starting with Dockerfile |
+| `\` | Folder separator | `c:\Users\...\file` |
+| `\|` | Pipe (send output) | `Get-Content file \| Set-Content file` |
+| `-` | Parameter flag | `-Path`, `-Force`, `-replace` |
+| `$` | Variable | `$file` = stored value |
+
+---
+
+## **10️⃣ SPECIAL CHARACTERS IN SEARCH**
+
+```powershell
+-replace 'dockerfile: \./backend/Dockerfile\.backend', 'new-path'
+```
+- **`\.`** = escaped dot (literal . not wildcard)
+- **`\/`** = escaped forward slash
+- **`\\`** = escaped backslash
+
+**Why?** In PowerShell, some characters have special meanings, so we "escape" them with `\` to use them literally.
+
+---
+
+## 📋 **COMMAND CHAIN WE USED (SUMMARY)**
+
+```powershell
+# 1. Create folder
+mkdir devops
+
+# 2. Move files
+Move-Item -Path .\Dockerfile.* -Destination .\devops\
+
+# 3. List files
+Get-ChildItem .\devops\
+
+# 4. Find & replace in docker-compose.yml
+(Get-Content docker-compose.yml) -replace 'Dockerfile\.backend', './devops/Dockerfile.backend' | Set-Content docker-compose.yml
+
+# 5. Find & replace in ci-cd.yml
+(Get-Content .\.github\workflows\ci-cd.yml) -replace './backend/Dockerfile\.backend', './devops/Dockerfile.backend' | Set-Content .\.github\workflows\ci-cd.yml
+
+# 6. Verify changes
+Select-String "dockerfile:" docker-compose.yml
+Select-String "dockerfile:" .\.github\workflows\ci-cd.yml
+
+# 7. Copy file
+Copy-Item "d:\Downloads\files\ci-cd.yml" "c:\...\ci-cd.yml" -Force
+```
+
+---
+
+## 🎯 **WHAT EACH COMMAND DID**
+
+| Command | Purpose | Result |
+|---------|---------|--------|
+| `mkdir` | Create folder | `devops/` folder created |
+| `Move-Item` | Move files | Dockerfiles moved to `devops/` |
+| `Get-ChildItem` | List files | See what's in folder |
+| `Get-Content` | Read file | Get text from file |
+| `-replace` | Find & replace | Change old paths to new paths |
+| `Set-Content` | Write file | Save changes to file |
+| `Select-String` | Search | Find lines with specific text |
+| `Copy-Item` | Copy file | Duplicate file to new location |
+| `Write-Host` | Print text | Show message on screen |
+
+---
+
+## 💡 **PRACTICE EXERCISE**
+
+Try these commands:
+
+```powershell
+# 1. List all files
+Get-ChildItem
+
+# 2. List only .yml files
+Get-ChildItem -Filter "*.yml"
+
+# 3. Search for a word in a file
+Select-String "mongodb" docker-compose.yml
+
+# 4. View first 10 lines of a file
+Get-Content docker-compose.yml | Select-Object -First 10
+
+# 5. Count lines in a file
+(Get-Content docker-compose.yml | Measure-Object -Line).Lines
+```

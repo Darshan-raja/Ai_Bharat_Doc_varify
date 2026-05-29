@@ -1,0 +1,124 @@
+# docker-compose.yml  — Orchestrates all 4 BharatVerify services together
+# Run: docker compose up --build
+# Stop: docker compose down
+
+version: "3.9"
+
+services:
+
+  # ─────────────────────────────────────────────────────────────────
+  # 1. MongoDB Database
+  # ─────────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7          # Official MongoDB image
+    container_name: bharatverify-mongo
+    restart: unless-stopped  # Restart automatically unless manually stopped
+    volumes:
+      - mongo_data:/data/db  # Persist data even if container is removed
+    networks:
+      - bharatverify-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # ─────────────────────────────────────────────────────────────────
+  # 2. Backend — Node.js / Express API
+  # ─────────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend    # Build using Dockerfile.backend
+      dockerfile: ./devops/Dockerfile.backend
+    container_name: bharatverify-backend
+    restart: unless-stopped
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      # MongoDB connection string — uses the "mongo" service name (Docker DNS)
+      MONGO_URI: mongodb://mongo:27017/bharatverify
+      JWT_SECRET: ${JWT_SECRET}          # Comes from .env file (never hardcode!)
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      # ML service URLs (Docker service names resolve automatically)
+      FORGE_DETECTION_URL: http://forge-detection:8000
+      OCR_API_URL: http://ocr-api:8001
+    ports:
+      - "5000:5000"         # Maps host port 5000 → container port 5000
+    depends_on:
+      mongo:
+        condition: service_healthy   # Wait until MongoDB is ready
+    networks:
+      - bharatverify-net
+    volumes:
+      - uploads_data:/app/uploads  # Persist uploaded files
+
+  # ─────────────────────────────────────────────────────────────────
+  # 3. Frontend — React/Vite → Nginx static server
+  # ─────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./devops/Dockerfile.frontend
+      args:
+        VITE_API_URL: http://localhost:5000   # Baked into the build
+    container_name: bharatverify-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"             # Frontend is accessible at http://localhost
+    depends_on:
+      - backend
+    networks:
+      - bharatverify-net
+
+  # ─────────────────────────────────────────────────────────────────
+  # 4. ML Forge Detection Service — FastAPI + EasyOCR + Gemini
+  # ─────────────────────────────────────────────────────────────────
+  forge-detection:
+    build:
+      context: ./ML/forge_detection
+      dockerfile: ./devops/Dockerfile.forge_detection
+    container_name: bharatverify-forge-detection
+    restart: unless-stopped
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}    # Required! Set in .env file
+    ports:
+      - "8000:8000"
+    networks:
+      - bharatverify-net
+    volumes:
+      - forge_uploads:/app/uploads
+
+  # ─────────────────────────────────────────────────────────────────
+  # 5. ML OCR API Service — FastAPI + Gemini
+  # ─────────────────────────────────────────────────────────────────
+  ocr-api:
+    build:
+      context: ./ML/OCR_api
+      dockerfile: ./devops/Dockerfile.ocr_api
+    container_name: bharatverify-ocr-api
+    restart: unless-stopped
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    ports:
+      - "8001:8001"
+    networks:
+      - bharatverify-net
+
+# ─────────────────────────────────────────────────────────────────
+# Named volumes (data persists across container restarts)
+# ─────────────────────────────────────────────────────────────────
+volumes:
+  mongo_data:
+  uploads_data:
+  forge_uploads:
+
+# ─────────────────────────────────────────────────────────────────
+# Custom Docker network (all services talk to each other by name)
+# ─────────────────────────────────────────────────────────────────
+networks:
+  bharatverify-net:
+    driver: bridge

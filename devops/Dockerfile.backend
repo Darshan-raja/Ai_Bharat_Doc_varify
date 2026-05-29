@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────────────────────────
+# Stage 1 – "builder"  (installs ALL deps including dev-tools)
+# ─────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy only the dependency files first (better layer caching)
+# If package.json doesn't change, Docker reuses the cached layer
+COPY package*.json ./
+
+# Install all dependencies (including devDependencies for potential build steps)
+RUN npm ci
+
+# Copy the rest of the application source code
+COPY . .
+
+# ─────────────────────────────────────────────────────────────────
+# Stage 2 – "production"  (lean image, no dev-tools)
+# ─────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS production
+
+# Add a non-root user for security (never run Node as root in production)
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy only package files and install PRODUCTION deps only
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+# Copy compiled/source files from the builder stage
+COPY --from=builder /app .
+
+# Create uploads directory (multer stores files here at runtime)
+RUN mkdir -p uploads && chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose the port the Express server listens on
+EXPOSE 5000
+
+# Health-check so Docker/orchestrators know the container is alive
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD wget -qO- http://localhost:5000/ || exit 1
+
+# Start the application
+CMD ["node", "server.js"]
