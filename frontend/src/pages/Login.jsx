@@ -38,7 +38,7 @@ export default function Login() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const API_BASE_URL = "http://localhost:5000";
+  const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -59,7 +59,7 @@ export default function Login() {
         setOtpSent(true);
         toast({
           title: "OTP Sent",
-          description: "Check your email for the verification code",
+          description: "Please check your email for the verification code",
         });
       } else {
         throw new Error(data.message || "Failed to send OTP");

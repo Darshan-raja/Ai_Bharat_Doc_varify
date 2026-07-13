@@ -111,7 +111,40 @@ app.post('/api/forge/predict', upload.single('file'), async (req, res) => {
 connectDb();
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.status(200).send(`
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Doc Verify API</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            color: #111827;
+          }
+          .card {
+            max-width: 560px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+          }
+          a {
+            color: #2563eb;
+            text-decoration: none;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h1>Backend API is running</h1>
+          <p>This port is the API server, not the frontend UI.</p>
+          <p>Open the app at <a href="http://localhost:9080">http://localhost:9080</a>.</p>
+          <p>API base: <a href="/api/users">/api/users</a></p>
+        </div>
+      </body>
+    </html>
+  `);
 });
 
 // Start HTTP server (no SSL)

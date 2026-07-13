@@ -3,11 +3,21 @@ import Admin from "../models/Admin.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import {
+  createMockUser,
+  countMockUsers,
+  findMockUserByEmail,
+  findMockUserById,
+  findMockUserByPhone,
+  listMockUsers,
+  updateMockUserById,
+} from "../db/mockUserStore.js";
 
 dotenv.config();
 
 // Use explicit JWT secret with a safe dev fallback; require in production
 const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev_jwt_secret_change_me' : undefined);
+const isMockDb = () => process.env.USE_MOCK_DB === 'true';
 
 
 // Create transporter only if credentials exist to avoid runtime 500s
@@ -48,6 +58,9 @@ export const registerUser = async (req, res) => {
       return res.json({ success: false, message: "Please fill in all fields" });
     }
 
+    const normalizedEmail = email.toLowerCase();
+    const trimmedPhone = phoneNumber.trim();
+
     // Validate phone number format (at least 10 digits)
     const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
     const cleanedPhone = phoneNumber.replace(/\D/g, '');
@@ -59,13 +72,46 @@ export const registerUser = async (req, res) => {
     }
 
     // Check if user already exists by email
-    const existingUserByEmail = await User.findOne({ email: email.toLowerCase() });
+    if (isMockDb()) {
+      const existingUserByEmail = findMockUserByEmail(normalizedEmail);
+      if (existingUserByEmail) {
+        return res.status(400).json({ success: false, message: "User with this email already registered" });
+      }
+
+      const existingUserByPhone = findMockUserByPhone(trimmedPhone);
+      if (existingUserByPhone) {
+        return res.status(400).json({ success: false, message: "User with this phone number already registered" });
+      }
+
+      const user = createMockUser({
+        firstname,
+        lastname,
+        email: normalizedEmail,
+        phoneNumber: trimmedPhone,
+        workingDomain,
+        organization,
+        status: 'pending',
+      });
+
+      return res.json({
+        success: true,
+        message: "Registration successful! Your account is pending admin approval.",
+        user: {
+          id: user._id,
+          name: user.firstname,
+          email: user.email,
+          status: user.status,
+        },
+      });
+    }
+
+    const existingUserByEmail = await User.findOne({ email: normalizedEmail });
     if (existingUserByEmail) {
       return res.status(400).json({ success: false, message: "User with this email already registered" });
     }
 
     // Check if user already exists by phone number
-    const existingUserByPhone = await User.findOne({ phoneNumber: phoneNumber.trim() });
+    const existingUserByPhone = await User.findOne({ phoneNumber: trimmedPhone });
     if (existingUserByPhone) {
       return res.status(400).json({ success: false, message: "User with this phone number already registered" });
     }
@@ -73,8 +119,8 @@ export const registerUser = async (req, res) => {
     const newUser = new User({
       firstname,
       lastname,
-      email: email.toLowerCase(),
-      phoneNumber: phoneNumber.trim(),
+      email: normalizedEmail,
+      phoneNumber: trimmedPhone,
       workingDomain,
       organization,
       status: 'pending', // New users are pending approval
@@ -110,12 +156,13 @@ export const registerUser = async (req, res) => {
 export const sendLoginOTP = async (req, res) => {
   try {
     const { email } = req.body;
+    const normalizedEmail = (email || '').trim().toLowerCase();
 
-    if (!email) {
+    if (!normalizedEmail) {
       return res.status(400).json({ success: false, message: "Email is required" });
     }
 
-    const user = await User.findOne({ email });
+    const user = isMockDb() ? findMockUserByEmail(normalizedEmail) : await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -151,17 +198,27 @@ export const sendLoginOTP = async (req, res) => {
       }
 
       // Update user with OTP details using findByIdAndUpdate to avoid full document validation
-      await User.findByIdAndUpdate(
-        user._id,
-        {
+      if (isMockDb()) {
+        updateMockUserById(user._id, {
           otp: {
             code: otpCode,
             expiresAt,
-            sentTo: transporter ? ['email'] : []
-          }
-        },
-        { runValidators: false } // Skip validation for backward compatibility with existing users
-      );
+            sentTo: transporter ? ['email'] : [],
+          },
+        });
+      } else {
+        await User.findByIdAndUpdate(
+          user._id,
+          {
+            otp: {
+              code: otpCode,
+              expiresAt,
+              sentTo: transporter ? ['email'] : []
+            }
+          },
+          { runValidators: false } // Skip validation for backward compatibility with existing users
+        );
+      }
 
       const responsePayload = {
         success: true,
@@ -169,15 +226,15 @@ export const sendLoginOTP = async (req, res) => {
         otpSentTo: transporter ? ['email'] : []
       };
 
-      // Log OTP in development for quick testing
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`[DEV] OTP for ${user.email}: ${otpCode}`);
-      }
-
-      // In non-production, return OTP for easier local testing
-      if (process.env.NODE_ENV !== 'production') {
-        responsePayload.debugOtp = otpCode;
-      }
+      // Always log OTP locally so it can be read from the backend terminal during testing.
+      const otpBanner = [
+        '========================================',
+        `OTP FOR ${user.email}`,
+        `CODE: ${otpCode}`,
+        '========================================',
+      ].join('\n');
+      console.log(otpBanner);
+      console.error(otpBanner);
 
       res.json(responsePayload);
 
@@ -195,15 +252,16 @@ export const sendLoginOTP = async (req, res) => {
 export const verifyLoginOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
+    const normalizedEmail = (email || '').trim().toLowerCase();
 
-    if (!email || !otp) {
+    if (!normalizedEmail || !otp) {
       return res.status(400).json({
         success: false,
         message: "Email and OTP are required"
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = isMockDb() ? findMockUserByEmail(normalizedEmail) : await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -237,11 +295,15 @@ export const verifyLoginOTP = async (req, res) => {
     }
 
     // Clear the OTP after successful verification using findByIdAndUpdate to avoid full document validation
-    await User.findByIdAndUpdate(
-      user._id,
-      { $unset: { otp: "" } },
-      { runValidators: false } // Skip validation for backward compatibility with existing users
-    );
+    if (isMockDb()) {
+      updateMockUserById(user._id, { $unset: { otp: "" } });
+    } else {
+      await User.findByIdAndUpdate(
+        user._id,
+        { $unset: { otp: "" } },
+        { runValidators: false } // Skip validation for backward compatibility with existing users
+      );
+    }
 
     // Generate JWT token
     if (!JWT_SECRET) {
@@ -285,7 +347,7 @@ export const logoutUser = (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = isMockDb() ? findMockUserById(req.user.id) : await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -307,7 +369,7 @@ export const getUser = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({});
+    const users = isMockDb() ? listMockUsers() : await User.find({});
     const userData = users.map(user => ({
       id: user._id,
       name: user.firstname || user.email,
@@ -330,7 +392,7 @@ export const getAllUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
-    const user = await User.findById(userId);
+    const user = isMockDb() ? findMockUserById(userId) : await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -358,11 +420,13 @@ export const updateUserResults = async (req, res) => {
     if (!name || !institution) {
       return res.status(400).json({ success: false, message: "Missing fields" });
     }
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { $push: { lastResults: { name, institution, date: new Date() } } },
-      { new: true }
-    );
+    const user = isMockDb()
+      ? updateMockUserById(userId, { $push: { lastResults: { name, institution, date: new Date() } } })
+      : await User.findByIdAndUpdate(
+          userId,
+          { $push: { lastResults: { name, institution, date: new Date() } } },
+          { new: true }
+        );
     res.json({ success: true, data: user });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -372,7 +436,9 @@ export const updateUserResults = async (req, res) => {
 export const fetchResults = async (req, res) => {
   try {
     // user id comes from auth middleware (JWT decoded)
-    const user = await User.findById(req.user.id).select("lastResults");
+    const user = isMockDb()
+      ? findMockUserById(req.user.id)
+      : await User.findById(req.user.id).select("lastResults");
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -430,7 +496,9 @@ export const authenticateAdmin = async (req, res) => {
 
 export const getPendingUsers = async (req, res) => {
   try {
-    const pendingUsers = await User.find({ status: 'pending' }).select('-otp');
+    const pendingUsers = isMockDb()
+      ? listMockUsers((user) => user.status === 'pending')
+      : await User.find({ status: 'pending' }).select('-otp');
 
     res.json({
       success: true,
@@ -459,11 +527,13 @@ export const approveUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "User ID is required" });
     }
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { status: 'approved', rejectionReason: null },
-      { new: true }
-    );
+    const user = isMockDb()
+      ? updateMockUserById(userId, { status: 'approved', rejectionReason: null })
+      : await User.findByIdAndUpdate(
+          userId,
+          { status: 'approved', rejectionReason: null },
+          { new: true }
+        );
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -494,11 +564,13 @@ export const rejectUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "User ID and rejection reason are required" });
     }
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { status: 'rejected', rejectionReason: reason },
-      { new: true }
-    );
+    const user = isMockDb()
+      ? updateMockUserById(userId, { status: 'rejected', rejectionReason: reason })
+      : await User.findByIdAndUpdate(
+          userId,
+          { status: 'rejected', rejectionReason: reason },
+          { new: true }
+        );
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -524,10 +596,10 @@ export const rejectUser = async (req, res) => {
 
 export const getUserStats = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments();
-    const acceptedUsers = await User.countDocuments({ status: 'approved' });
-    const rejectedUsers = await User.countDocuments({ status: 'rejected' });
-    const pendingUsers = await User.countDocuments({ status: 'pending' });
+    const totalUsers = isMockDb() ? countMockUsers() : await User.countDocuments();
+    const acceptedUsers = isMockDb() ? countMockUsers((user) => user.status === 'approved') : await User.countDocuments({ status: 'approved' });
+    const rejectedUsers = isMockDb() ? countMockUsers((user) => user.status === 'rejected') : await User.countDocuments({ status: 'rejected' });
+    const pendingUsers = isMockDb() ? countMockUsers((user) => user.status === 'pending') : await User.countDocuments({ status: 'pending' });
 
     res.json({
       success: true,

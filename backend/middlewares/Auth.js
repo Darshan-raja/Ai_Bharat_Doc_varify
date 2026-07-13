@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import { findMockUserById } from '../db/mockUserStore.js';
 // Align JWT secret handling with controllers to avoid dev crashes
 const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev_jwt_secret_change_me' : undefined);
 export const userAuth = async (req, res, next) => {
@@ -15,7 +16,9 @@ export const userAuth = async (req, res, next) => {
         }
         const decoded = jwt.verify(token, JWT_SECRET);
 
-        const user = await User.findById(decoded.id);
+        const user = process.env.USE_MOCK_DB === 'true'
+            ? findMockUserById(decoded.id)
+            : await User.findById(decoded.id);
         if (!user) {
             return res.status(401).json({ success: false, message: 'User not found' });
         }
